@@ -1,7 +1,23 @@
-{% extends "nav.html" %}
-{% block title %} Tours {% endblock %}
-{% block content %}
-<body id="home">
-    <h1>Tours</h1>
-</body>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <th>Tour</th>
+                <th>Rating</th>
+                <th>Avg. Completion Time</th>
+            </tr>
+            {% for t in tours %}
+                <tr>
+                    <td>{{t.name}}</td>
+                    <td>{{t.average_rating}}</td>
+                    <td>{{t.estimated_completion_time}}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </body>
+</html>
