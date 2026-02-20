@@ -74,7 +74,13 @@ def tour():
 def contact():
     return render_template("contact.html")
 
+@app.route('/feedback')
+def feedback():
+    return render_template('feedback.html')
 
+@app.route('/reviews')
+def reviews():
+    return render_template('reviews.html')
 
 
 app.run(debug=True)
