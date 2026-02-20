@@ -47,13 +47,34 @@ class Review(db.Model):
 with app.app_context():
     db.create_all()
 
-@app.route("/")
-def index():
-    return render_template("index.html")
-
 @app.route("/admin/tours")
 def tours():
     tours = Tour.query.all()
     return render_template("tours.html", tours=tours)
+avalible_tours = ["Historic Tour", "Art Tour", "Campus Tour", "Nature Tour"]
+
+@app.route("/")
+def root():
+    return render_template('home.html')
+
+@app.route("/Tours")
+def see_tours():
+    return render_template('tour_list.html', tours=avalible_tours)
+
+@app.route("/Places")
+def place():
+    return render_template('places.html')
+
+@app.route("/Tour")
+def tour():
+    return render_template("tour.html")
+
+@app.route("/Contact")
+def contact():
+    return render_template("contact.html")
+
+
+
 
 app.run(debug=True)
+
