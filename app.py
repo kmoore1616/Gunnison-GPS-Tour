@@ -2,6 +2,7 @@ from flask import Flask, render_template
 
 app = Flask(__name__, static_url_path='/static')
 
+<<<<<<< GPS-11
 avalible_tours = ["Historic Tour", "Art Tour", "Campus Tour", "Nature Tour"]
 
 @app.route("/")
@@ -26,3 +27,7 @@ def contact():
 
 app.run(debug=True)
 
+=======
+
+app.run(debug=True)
+>>>>>>> main
