@@ -51,4 +51,9 @@ with app.app_context():
 def index():
     return render_template("index.html")
 
+@app.route("/admin/tours")
+def tours():
+    tours = Tour.query.all()
+    return render_template("tours.html", tours=tours)
+
 app.run(debug=True)
