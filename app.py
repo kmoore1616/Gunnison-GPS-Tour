@@ -51,7 +51,7 @@ with app.app_context():
 @app.route("/admin/tours")
 def tours():
     tours = Tour.query.all()
-    return render_template("tours.html", tours=tours)
+    return render_template("viewTour.html", tours=tours)
 avalible_tours = ["Historic Tour", "Art Tour", "Campus Tour", "Nature Tour"]
 
 @app.route("/")
@@ -68,7 +68,7 @@ def place():
 
 @app.route("/Tour")
 def tour():
-    return render_template("tour.html")
+    return render_template("onTour.html")
 
 @app.route("/Contact")
 def contact():
@@ -81,6 +81,24 @@ def feedback():
 @app.route('/reviews')
 def reviews():
     return render_template('reviews.html')
+
+##All of these will need to have login required but for testing reasons not doing that rn
+@app.route('/adminhome')
+def home():
+    return render_template('adminhome.html')
+
+@app.route('/edittours')
+def tours():
+    return render_template('edittours.html')
+
+@app.route('/adminfeedback')
+def feedback():
+    return render_template('adminfeedback.html')
+
+@app.route('/adminreviews')
+def reviews():
+    return render_template('adminreviews.html')
+
 
 
 app.run(debug=True)
