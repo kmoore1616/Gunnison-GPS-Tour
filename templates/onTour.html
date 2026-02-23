@@ -1,4 +1,15 @@
 {% extends "base.html" %}                                                                                                                                                         
-{% block body %}                                                                                                                                                                  
-ON TOUR...
+{% block head %}
+<script src="https://maps.googleapis.com/maps/api/js?key=***APIKEY***&libraries=mapslibraries=maps,marker&v=weekly"
+        defer></script>
+<script type="module" src="{{ url_for('static', filename='main.js') }}"></script>
+{% endblock %}
+{% block body %}
+<div>
+    <gmp-map
+        center="38.5447034747275, -106.92149562499891"
+        zoom="13"
+        map-id="9be9ab52711665365d058960">
+    </gmp-map>
+</div>
 {% endblock %}   

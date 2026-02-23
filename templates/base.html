@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<<<<<<< Updated upstream
 
 <head>
                 <title>Welcome</title>
@@ -7,22 +8,32 @@
 <body>
 <nav>
         <ul>
+=======
+<html lang="en">
+    <head>
+        <title>Welcome</title>
+        <link href="/static/stylesheet.css" rel="stylesheet">
+        {% block head %}
+        {% endblock %}
+    </head>
+    <body>
+        <nav>
+            <ul>
+>>>>>>> Stashed changes
                 <li><a href="/">Home</a></li>
                 <li><a href="/Tours">Tours</a></li>
                 <li><a href="/Places">Places</a></li>
-
-        </ul>
-</nav>
+            </ul>
+        </nav>
         {% block body %}
         {% endblock %}
-<footer>
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/Tours">Tours</a></li>
-        <li><a href="/Places">Places</a></li>
-        <li><a href="/Contact">Contact</a></li>
-    </ul>
-</footer>
-</body>
+        <footer>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/Tours">Tours</a></li>
+                <li><a href="/Places">Places</a></li>
+                <li><a href="/Contact">Contact</a></li>
+            </ul>
+        </footer>
+    </body>
 </html>
-

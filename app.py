@@ -51,7 +51,12 @@ with app.app_context():
 @app.route("/admin/tours")
 def tours():
     tours = Tour.query.all()
+<<<<<<< Updated upstream
     return render_template("viewTour.html", tours=tours)
+=======
+    return render_template("tours.html", tours=tours)
+
+>>>>>>> Stashed changes
 avalible_tours = ["Historic Tour", "Art Tour", "Campus Tour", "Nature Tour"]
 
 @app.route("/")
@@ -74,6 +79,7 @@ def tour():
 def contact():
     return render_template("contact.html")
 
+<<<<<<< Updated upstream
 @app.route('/feedback')
 def feedback():
     return render_template('feedback.html')
@@ -101,5 +107,6 @@ def reviews():
 
 
 
+=======
+>>>>>>> Stashed changes
 app.run(debug=True)
-
