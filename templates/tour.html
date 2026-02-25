@@ -1,45 +1,19 @@
 {% extends "base.html" %}
+{% block head %}
+    <style>
+    gmp-map {
+        height: 400px; /* The height is 400 pixels */
+        width: 100%; /* The width is the width of the web page */
+    }
+    </style>
+
+    <script type="module" src="../static/main.js"></script>
+    <!-- prettier-ignore -->
+    <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+        ({key: "AIzaSyA5NCmT4YZvoa5KVQcOF1XHN3B8PxNpapQ", v: "weekly"});</script>
+
+{% endblock %}
 {% block body %}
-<div class="main-content">
-    <div class="control-panel">
-      <form id="compute-routes-form">
-        <section>
-          <h2>Plot a Route</h2>
-          <div class="row">
-            <label>Origin</label>
-            <div class="coord-input-container">
-              <input type="number" id="origin-lat" placeholder="Latitude" step="any" required>
-              <input type="number" id="origin-lng" placeholder="Longitude" step="any" required>
-            </div>
-          </div>
-          <div class="row">
-            <label>Destination</label>
-            <div class="coord-input-container">
-              <input type="number" id="dest-lat" placeholder="Latitude" step="any" required>
-              <input type="number" id="dest-lng" placeholder="Longitude" step="any" required>
-            </div>
-          </div>
-          <div class="row">
-            <label>Travel Mode</label>
-            <select name="travel-mode" id="travel-mode">
-              <option value="DRIVING">Driving</option>
-              <option value="WALKING">Walking</option>
-              <option value="BICYCLING">Bicycling</option>
-              <option value="TRANSIT">Transit</option>
-            </select>
-          </div>
-        </section>
-        <button class="button-primary" type="submit">Get route</button>
-      </form>
-      <div id="message-box"></div>
-    </div>
-    <div class="map-container">
-      <gmp-map id="map" class="map" center="37.422, -122.084" zoom="12" map-id="DEMO_MAP_ID"></gmp-map>
-    </div>
-  </div>
-  <script>(g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })
-      ({ key: "{{ api_key }}", v: "beta" });</script>
-  <script src="{{ url_for('static', filename='map.js') }}"></script>
-
-
+    <gmp-map center="38.54260065425841, -106.91915044613187" zoom="18" map-id="DEMO_MAP_ID">
+    </gmp-map>
 {% endblock %}

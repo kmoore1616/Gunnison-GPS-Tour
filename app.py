@@ -1,6 +1,7 @@
 # Main Python Runner
 import os
-from flask import Flask, render_template, redirect, request
+import requests
+from flask import Flask, render_template, redirect, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from dotenv import load_dotenv
@@ -52,6 +53,49 @@ class Review(db.Model):
 
 with app.app_context():
     db.create_all()
+
+@app.route("/api/route", methods=["POST"])
+def api_route():
+    data = request.get_json(force=True)
+    origin = data["origin"]
+    destination = data["destination"]
+
+    url = "https://routes.googleapis.com/directions/v2:computeRoutes"
+
+    body = {
+        "origin": {
+            "location": {"latLng": {"latitude": origin["lat"], "longitude": origin["lng"]}}
+        },
+        "destination": {
+            "location": {"latLng": {"latitude": destination["lat"], "longitude": destination["lng"]}}
+        },
+        "travelMode": "WALK",
+        "polylineEncoding": "ENCODED_POLYLINE",
+    }
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": api_key,
+        "X-Goog-FieldMask": "routes.polyline.encodedPolyline",
+    }
+
+    r = requests.post(url, json=body, headers=headers, timeout=20)
+
+    try:
+        payload = r.json()
+    except Exception:
+        return jsonify({"error": "Non-JSON response from Routes API", "status": r.status_code, "text": r.text}), 502
+
+    if not r.ok:
+        return jsonify({"error": payload}), r.status_code
+
+    routes = payload.get("routes")
+    if not routes:
+        return jsonify({"error": "No routes returned", "payload": payload}), 502
+
+    encoded = routes[0]["polyline"]["encodedPolyline"]
+    return jsonify({"encodedPolyline": encoded})
+
 
 @app.route("/admin/tours")
 def tours():
