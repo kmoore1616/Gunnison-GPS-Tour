@@ -60,7 +60,15 @@ def root():
 
 @app.route("/Tours")
 def see_tours():
-    return render_template('tour_list.html', tours=avalible_tours)
+    col = []
+    entries = Tour.query.all()
+    for e in entries:
+        row = []
+        row.append(e.id)
+        row.append(e.name)
+        row.append(e.description)
+        col.append(row)
+    return render_template('tour_list.html', tours=avalible_tours, col = col)
 
 @app.route("/Places")
 def place():
@@ -74,29 +82,29 @@ def tour():
 def contact():
     return render_template("contact.html")
 
-@app.route('/feedback')
+@app.route("/feedback")
 def feedback():
     return render_template('feedback.html')
 
-@app.route('/reviews')
+@app.route("/reviews")
 def reviews():
     return render_template('reviews.html')
 
 ##All of these will need to have login required but for testing reasons not doing that rn
-@app.route('/adminhome')
-def home():
+@app.route("/adminhome")
+def adminhome():
     return render_template('adminhome.html')
 
-@app.route('/edittours')
-def tours():
+@app.route("/edittours")
+def edittours():
     return render_template('edittours.html')
 
-@app.route('/adminfeedback')
-def feedback():
+@app.route("/adminfeedback")
+def adminfeedback():
     return render_template('adminfeedback.html')
 
-@app.route('/adminreviews')
-def reviews():
+@app.route("/adminreviews")
+def adminreviews():
     return render_template('adminreviews.html')
 
 
