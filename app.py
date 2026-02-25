@@ -1,7 +1,12 @@
 # Main Python Runner
+import os
 from flask import Flask, render_template, redirect, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from dotenv import load_dotenv
+
+load_dotenv()
+api_key = os.getenv("MAPS_API_KEY")
 
 app = Flask(__name__, static_url_path='/static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gps-database.sqlite'
@@ -52,6 +57,7 @@ with app.app_context():
 def tours():
     tours = Tour.query.all()
     return render_template("tours.html", tours=tours)
+
 avalible_tours = ["Historic Tour", "Art Tour", "Campus Tour", "Nature Tour"]
 
 @app.route("/")
@@ -68,14 +74,10 @@ def place():
 
 @app.route("/Tour")
 def tour():
-    return render_template("tour.html")
+    return render_template("tour.html", api_key=api_key, longitude=38.54906559678029, latitude=-106.91808868263226)
 
 @app.route("/Contact")
 def contact():
     return render_template("contact.html")
 
-
-
-
 app.run(debug=True)
-
