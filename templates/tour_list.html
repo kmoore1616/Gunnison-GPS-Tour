@@ -1,9 +1,18 @@
-{% extends "base.html" %}
-{% block body %}
-
-LIST TOURS
-{% for tour in tours %}
-    <h1> {{tour}} </h1>
-{% endfor %}
+{% extends "visitornav.html" %}
+{% block title %} Tours {% endblock %}
+{% block content %}
+  <table>
+    {% for i in col %}
+    <tr>
+      <td><a href="/viewTour/{{i[0]}}">{{ i[1] }}</a></td> <!-- tour name | will direct them to the specific tour -->
+        <!--Maybe a clickable box instead of just the tour name-->
+    </tr>
+    <tr>
+        <td>{{ i[2] }}</td>  <!-- tour description -->
+    </tr>
+    {% endfor %}
+  </table>
 
 {% endblock %}
+
+<!--Have to merge base and nav bar, python wont let you extend multiple -->
