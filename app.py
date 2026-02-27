@@ -99,25 +99,6 @@ def compute_route(origin, destination):
 
     return encoded
 
-@app.route("/admin/tours")
-def tours():
-    tours = Tour.query.all()
-    return render_template("tours.html", tours=tours)
-
-avalible_tours = ["Historic Tour", "Art Tour", "Campus Tour", "Nature Tour"]
-
-@app.route("/")
-def root():
-    return render_template('home.html')
-
-@app.route("/Tours")
-def see_tours():
-    return render_template('tour_list.html', tours=avalible_tours)
-
-@app.route("/Places")
-def place():
-    return render_template('places.html')
-
 # This should never be routed to, its just called from the JS
 @app.route("/get_tour_poly/<tour_id>", methods=["GET"])
 def get_tour_poly(tour_id):
@@ -142,14 +123,38 @@ def get_tour_poly(tour_id):
         origin = {"lat": float(a.latitude), "lng": float(a.longitude)}
         dest   = {"lat": float(b.latitude), "lng": float(b.longitude)}
 
+        
+        segments.append((origin, dest))
         encoded = compute_route(origin, dest) # Call helper function to get polyline
         polylines.append(encoded) # Add to list of all routes
-        segments.append({"fromPlaceId": a.id, "toPlaceId": b.id})
+
     return jsonify({"tourId": tour_id, "polylines": polylines, "segments": segments}) # Send data to JS
+
+
+@app.route("/admin/tours")
+def tours():
+    tours = Tour.query.all()
+    return render_template("tours.html", tours=tours)
+
+avalible_tours = ["Historic Tour", "Art Tour", "Campus Tour", "Nature Tour"]
+
+@app.route("/")
+def root():
+    return render_template('home.html')
+
+@app.route("/Tours")
+def see_tours():
+    return render_template('tour_list.html', tours=avalible_tours)
+
+@app.route("/Places")
+def place():
+    return render_template('places.html')
+
 
 @app.route("/Tour")
 def tour():
-    return render_template("tour.html", api_key=api_key)
+    tour_list=1
+    return render_template("tour.html", api_key=api_key, tour_list=tour_list)
 
 @app.route("/Contact")
 def contact():
