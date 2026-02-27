@@ -48,11 +48,6 @@ class Review(db.Model):
 with app.app_context():
     db.create_all()
 
-@app.route("/admin/tours")
-def tours():
-    tours = Tour.query.all()
-    return render_template("viewTour.html", tours=tours)
-avalible_tours = ["Historic Tour", "Art Tour", "Campus Tour", "Nature Tour"]
 
 @app.route("/")
 def root():
@@ -68,7 +63,7 @@ def see_tours():
         row.append(e.name)
         row.append(e.description)
         col.append(row)
-    return render_template('tour_list.html', tours=avalible_tours, col = col)
+    return render_template('tour_list.html', col = col)
 
 @app.route("/Places")
 def place():
@@ -89,6 +84,11 @@ def feedback():
 @app.route("/reviews")
 def reviews():
     return render_template('reviews.html')
+
+@app.route('/viewTour/<tour_id>')
+def viewtour(tour_id):
+    currtour = Tour.query.filter_by(id=tour_id).first()
+    return render_template('viewTour.html', tour=currtour.name, rating=currtour.average_rating,time=currtour.estimated_completion_time)
 
 ##All of these will need to have login required but for testing reasons not doing that rn
 @app.route("/adminhome")
