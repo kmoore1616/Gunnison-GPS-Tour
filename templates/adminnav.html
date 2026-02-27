@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/adminhome">Home</a></li>
+            <li><a href="/edittours">Tours</a></li>
+            <li><a href="/adminreviews">Reviews</a></li>
+            <li><a href="/adminfeedback">Feedback</a></li>
+            <li><a href="/logout">Log Out</a></li>
+        </ul>
+    </nav>
+    {% block content %}
+    {% endblock %}
+</body>
+</html>

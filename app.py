@@ -1,4 +1,3 @@
-# Main Python Runnerapp
 import os
 import requests
 from flask import Flask, render_template, redirect, request, jsonify
@@ -137,7 +136,15 @@ def root():
 
 @app.route("/Tours")
 def see_tours():
-    return render_template('tour_list.html', tours=avalible_tours)
+    col = []
+    entries = Tour.query.all()
+    for e in entries:
+        row = []
+        row.append(e.id)
+        row.append(e.name)
+        row.append(e.description)
+        col.append(row)
+    return render_template('tour_list.html', col = col)
 
 @app.route("/Places")
 def place():
@@ -146,11 +153,42 @@ def place():
 
 @app.route("/Tour")
 def tour():
+<<<<<<< HEAD
     tour_list=1
     return render_template("tour.html", api_key=api_key, tour_list=tour_list)
 
 @app.route("/Contact")
 def contact():
     return render_template("contact.html")
+
+@app.route("/feedback")
+def feedback():
+    return render_template('feedback.html')
+
+@app.route("/reviews")
+def reviews():
+    return render_template('reviews.html')
+
+@app.route('/viewTour/<tour_id>')
+def viewtour(tour_id):
+    currtour = Tour.query.filter_by(id=tour_id).first()
+    return render_template('viewTour.html', tour=currtour.name, rating=currtour.average_rating,time=currtour.estimated_completion_time)
+
+##All of these will need to have login required but for testing reasons not doing that rn
+@app.route("/adminhome")
+def adminhome():
+    return render_template('adminhome.html')
+
+@app.route("/edittours")
+def edittours():
+    return render_template('edittours.html')
+
+@app.route("/adminfeedback")
+def adminfeedback():
+    return render_template('adminfeedback.html')
+
+@app.route("/adminreviews")
+def adminreviews():
+    return render_template('adminreviews.html')
 
 app.run(debug=True)
