@@ -6,4 +6,23 @@
   <h1>Estimated time: {{ time }}</h1>
   <h1>Average Rating: {{ rating }}</h1>
 </body>
+{% block head %}
+    <style>
+    gmp-map {
+        height: 800px; /* The height is 400 pixels */
+        width: 100%; /* The width is the width of the web page */
+    }
+    </style>
+
+    <script type="module" src="../static/map.js"></script>
+    <!-- prettier-ignore -->
+    <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+        ({key: "AIzaSyA5NCmT4YZvoa5KVQcOF1XHN3B8PxNpapQ", v: "weekly"});</script>
+
+{% endblock %}
+{% block body %}
+    <div id="tour-id">{{ tour_id }}</div>
+    <gmp-map center="38.54260065425841, -106.91915044613187" zoom="18" map-id="DEMO_MAP_ID">
+    </gmp-map>
+{% endblock %}
 {% endblock %}
