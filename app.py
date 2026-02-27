@@ -1,4 +1,4 @@
-# Main Python Runner
+# Main Python Runnerapp
 import os
 import requests
 from flask import Flask, render_template, redirect, request, jsonify
@@ -54,20 +54,16 @@ class Review(db.Model):
 with app.app_context():
     db.create_all()
 
-@app.route("/api/route", methods=["POST"])
-def api_route():
-    data = request.get_json(force=True)
-    origin = data["origin"]
-    destination = data["destination"]
-
+# Helper function that calls routes api
+def compute_route(origin, destination):
     url = "https://routes.googleapis.com/directions/v2:computeRoutes"
 
     body = {
         "origin": {
-            "location": {"latLng": {"latitude": origin["lat"], "longitude": origin["lng"]}}
+            "location": {"latLng": {"latitude": origin["lng"], "longitude": origin["lat"]}}
         },
         "destination": {
-            "location": {"latLng": {"latitude": destination["lat"], "longitude": destination["lng"]}}
+            "location": {"latLng": {"latitude": destination["lng"], "longitude": destination["lat"]}}
         },
         "travelMode": "WALK",
         "polylineEncoding": "ENCODED_POLYLINE",
@@ -80,22 +76,28 @@ def api_route():
     }
 
     r = requests.post(url, json=body, headers=headers, timeout=20)
+    
+    if not r.ok:
+        print("Routes API FAILED")
+        print("STATUS:", r.status_code)
+        print("TEXT:", r.text)
+        return None
 
     try:
         payload = r.json()
     except Exception:
-        return jsonify({"error": "Non-JSON response from Routes API", "status": r.status_code, "text": r.text}), 502
+        print("Error on r.json()")
+        return None
 
-    if not r.ok:
-        return jsonify({"error": payload}), r.status_code
 
     routes = payload.get("routes")
     if not routes:
-        return jsonify({"error": "No routes returned", "payload": payload}), 502
+        print("error on getting routes")
+        return None
 
     encoded = routes[0]["polyline"]["encodedPolyline"]
-    return jsonify({"encodedPolyline": encoded})
 
+    return encoded
 
 @app.route("/admin/tours")
 def tours():
@@ -116,9 +118,38 @@ def see_tours():
 def place():
     return render_template('places.html')
 
+# This should never be routed to, its just called from the JS
+@app.route("/get_tour_poly/<tour_id>", methods=["GET"])
+def get_tour_poly(tour_id):
+    tour = Tour.query.get(tour_id) # Get tour from DB
+
+    if not tour:
+        return jsonify({"error": f"Tour {tour_id} not found"}), 404
+
+    places = tour.places
+    if len(places) < 2:
+        return jsonify({ # Equivalant of error just passed down to JS
+            "tourId": tour_id,
+            "polylines": [],
+            "segments": [],
+            "message": "Need at least 2 places to create route segments"
+        })
+    
+    polylines = []
+    segments = []
+    
+    for a, b in zip(places, places[1:]): # combine all places on tour into orgins and destinations
+        origin = {"lat": float(a.latitude), "lng": float(a.longitude)}
+        dest   = {"lat": float(b.latitude), "lng": float(b.longitude)}
+
+        encoded = compute_route(origin, dest) # Call helper function to get polyline
+        polylines.append(encoded) # Add to list of all routes
+        segments.append({"fromPlaceId": a.id, "toPlaceId": b.id})
+    return jsonify({"tourId": tour_id, "polylines": polylines, "segments": segments}) # Send data to JS
+
 @app.route("/Tour")
 def tour():
-    return render_template("tour.html", api_key=api_key, longitude=38.54906559678029, latitude=-106.91808868263226)
+    return render_template("tour.html", api_key=api_key)
 
 @app.route("/Contact")
 def contact():
