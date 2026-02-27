@@ -153,9 +153,8 @@ def place():
 
 @app.route("/Tour")
 def tour():
-<<<<<<< HEAD
     tour_list=1
-    return render_template("tour.html", api_key=api_key, tour_list=tour_list)
+    return render_template("onTour.html", api_key=api_key, tour_list=tour_list)
 
 @app.route("/Contact")
 def contact():

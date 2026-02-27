@@ -57,7 +57,7 @@ async function initMap() {
 
     map.setOptions({ mapTypeControl: false });
 
-    const tourId = document.getElementById("tour-id").innerHTML;
+    const tourId = 1;
     console.log(tourId);
     await drawTourPolylines(map, tourId, AdvancedMarkerElement);
 
