@@ -2,8 +2,15 @@
 {% block head %}
     <style>
     gmp-map {
-        height: 800px; /* The height is 400 pixels */
-        width: 100%; /* The width is the width of the web page */
+        height: clamp(300px, 60vh, 700px);
+        width: 100%;
+        display: block;
+    }
+
+    @media (max-width: 600px) {
+        gmp-map {
+            height: 50vh;
+        }
     }
     </style>
 
@@ -14,7 +21,7 @@
 
 {% endblock %}
 {% block body %}
-    <div id="tour-id">{{ tour_id }}</div>
+    <div hidden id="tour-id">{{ tour_id }}</div>
     <gmp-map center="38.54260065425841, -106.91915044613187" zoom="18" map-id="DEMO_MAP_ID">
     </gmp-map>
 {% endblock %}
