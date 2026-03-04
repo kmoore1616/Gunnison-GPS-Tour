@@ -68,52 +68,6 @@ with app.app_context():
     db.create_all()
 
 
-def ensure_tour_places_next_stop_column():
-    """
-    Lightweight SQLite migration:
-    - add tour_places.next_stop_place_id if missing
-    - seed NULL pointers to current place_id order per tour
-    """
-    cols = db.session.execute(text("PRAGMA table_info('tour_places')")).fetchall()
-    col_names = {col[1] for col in cols}
-
-    if "next_stop_place_id" not in col_names:
-        db.session.execute(text("ALTER TABLE tour_places ADD COLUMN next_stop_place_id INTEGER"))
-        db.session.commit()
-
-    tour_ids = db.session.execute(text("SELECT DISTINCT tour_id FROM tour_places")).fetchall()
-    for row in tour_ids:
-        curr_tour_id = row[0]
-        place_ids = db.session.execute(
-            text("SELECT place_id FROM tour_places WHERE tour_id = :tour_id ORDER BY place_id"),
-            {"tour_id": curr_tour_id},
-        ).fetchall()
-
-        if not place_ids:
-            continue
-
-        ordered_place_ids = [p[0] for p in place_ids]
-        for idx, place_id in enumerate(ordered_place_ids):
-            next_stop = ordered_place_ids[idx + 1] if idx + 1 < len(ordered_place_ids) else None
-            db.session.execute(
-                text(
-                    """
-                    UPDATE tour_places
-                    SET next_stop_place_id = :next_stop
-                    WHERE tour_id = :tour_id
-                      AND place_id = :place_id
-                      AND next_stop_place_id IS NULL
-                    """
-                ),
-                {"tour_id": curr_tour_id, "place_id": place_id, "next_stop": next_stop},
-            )
-
-    db.session.commit()
-
-
-with app.app_context():
-    ensure_tour_places_next_stop_column()
-
 # Helper function that calls routes api
 def compute_route(origin, destination):
     url = "https://routes.googleapis.com/directions/v2:computeRoutes"
@@ -161,7 +115,7 @@ def compute_route(origin, destination):
 
 
 def get_ordered_places_for_tour(tour_id):
-    link_rows = db.session.execute(
+    link_rows = db.session.execute( # More up to date sqlite API call
         text(
             """
             SELECT place_id, next_stop_place_id
@@ -175,12 +129,12 @@ def get_ordered_places_for_tour(tour_id):
     if not link_rows:
         return []
 
+    # Linked list implementation
     next_by_place = {row[0]: row[1] for row in link_rows}
     place_ids = set(next_by_place.keys())
     referenced_ids = {next_id for next_id in next_by_place.values() if next_id is not None}
     head_candidates = sorted(place_ids - referenced_ids)
 
-    # Linked list head; fallback to smallest place_id for malformed cycles.
     current = head_candidates[0] if head_candidates else min(place_ids)
     ordered_place_ids = []
     visited = set()
@@ -190,7 +144,6 @@ def get_ordered_places_for_tour(tour_id):
         visited.add(current)
         current = next_by_place[current]
 
-    # If data is malformed (cycle/disconnected), append remaining stops deterministically.
     remaining = sorted(place_ids - visited)
     ordered_place_ids.extend(remaining)
 
