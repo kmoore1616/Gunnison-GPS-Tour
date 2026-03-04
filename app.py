@@ -4,6 +4,7 @@ from flask import Flask, render_template, redirect, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from dotenv import load_dotenv
+from sqlalchemy import text
 
 load_dotenv()
 api_key = os.getenv("MAPS_API_KEY")
@@ -15,7 +16,8 @@ db = SQLAlchemy(app)
 tour_places = db.Table(
     "tour_places",
     db.Column('tour_id', db.Integer, db.ForeignKey('tour.id'), primary_key=True),
-    db.Column('place_id', db.Integer, db.ForeignKey('place.id'), primary_key=True)
+    db.Column('place_id', db.Integer, db.ForeignKey('place.id'), primary_key=True),
+    db.Column('next_stop_place_id', db.Integer, db.ForeignKey('place.id'), nullable=True),
 )
 
 class Admin(UserMixin, db.Model):
@@ -34,7 +36,13 @@ class Tour(db.Model):
     average_rating = db.Column(db.Float)
     estimated_completion_time = db.Column(db.Integer)
     reviews = db.relationship('Review', backref='tour')
-    places = db.relationship('Place', secondary=tour_places, back_populates='tours')
+    places = db.relationship(
+        'Place',
+        secondary=tour_places,
+        primaryjoin="Tour.id == tour_places.c.tour_id",
+        secondaryjoin="Place.id == tour_places.c.place_id",
+        back_populates='tours',
+    )
 
 class Place(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -42,7 +50,13 @@ class Place(db.Model):
     description = db.Column(db.String(1000))
     longitude = db.Column(db.String(25), nullable=False)
     latitude = db.Column(db.String(25), nullable=False)
-    tours = db.relationship('Tour', secondary=tour_places, back_populates='places')
+    tours = db.relationship(
+        'Tour',
+        secondary=tour_places,
+        primaryjoin="Place.id == tour_places.c.place_id",
+        secondaryjoin="Tour.id == tour_places.c.tour_id",
+        back_populates='places',
+    )
 
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -53,16 +67,17 @@ class Review(db.Model):
 with app.app_context():
     db.create_all()
 
+
 # Helper function that calls routes api
 def compute_route(origin, destination):
     url = "https://routes.googleapis.com/directions/v2:computeRoutes"
 
     body = {
         "origin": {
-            "location": {"latLng": {"latitude": origin["lng"], "longitude": origin["lat"]}}
+            "location": {"latLng": {"latitude": origin["lat"], "longitude": origin["lng"]}}
         },
         "destination": {
-            "location": {"latLng": {"latitude": destination["lng"], "longitude": destination["lat"]}}
+            "location": {"latLng": {"latitude": destination["lat"], "longitude": destination["lng"]}}
         },
         "travelMode": "WALK",
         "polylineEncoding": "ENCODED_POLYLINE",
@@ -98,6 +113,44 @@ def compute_route(origin, destination):
 
     return encoded
 
+
+def get_ordered_places_for_tour(tour_id):
+    link_rows = db.session.execute( # More up to date sqlite API call
+        text(
+            """
+            SELECT place_id, next_stop_place_id
+            FROM tour_places
+            WHERE tour_id = :tour_id
+            """
+        ),
+        {"tour_id": tour_id},
+    ).fetchall()
+
+    if not link_rows:
+        return []
+
+    # Linked list implementation
+    next_by_place = {row[0]: row[1] for row in link_rows}
+    place_ids = set(next_by_place.keys())
+    referenced_ids = {next_id for next_id in next_by_place.values() if next_id is not None}
+    head_candidates = sorted(place_ids - referenced_ids)
+
+    current = head_candidates[0] if head_candidates else min(place_ids)
+    ordered_place_ids = []
+    visited = set()
+
+    while current is not None and current not in visited and current in next_by_place:
+        ordered_place_ids.append(current)
+        visited.add(current)
+        current = next_by_place[current]
+
+    remaining = sorted(place_ids - visited)
+    ordered_place_ids.extend(remaining)
+
+    place_rows = Place.query.filter(Place.id.in_(ordered_place_ids)).all()
+    place_by_id = {place.id: place for place in place_rows}
+    return [place_by_id[place_id] for place_id in ordered_place_ids if place_id in place_by_id]
+
 # This should never be routed to, its just called from the JS
 @app.route("/get_tour_poly/<tour_id>", methods=["GET"])
 def get_tour_poly(tour_id):
@@ -106,7 +159,7 @@ def get_tour_poly(tour_id):
     if not tour:
         return jsonify({"error": f"Tour {tour_id} not found"}), 404
 
-    places = tour.places
+    places = get_ordered_places_for_tour(tour_id)
     if len(places) < 2:
         return jsonify({ # Equivalant of error just passed down to JS
             "tourId": tour_id,
@@ -120,7 +173,7 @@ def get_tour_poly(tour_id):
     
     for a, b in zip(places, places[1:]): # combine all places on tour into orgins and destinations
         origin = {"lat": float(a.latitude), "lng": float(a.longitude)}
-        dest   = {"lat": float(b.latitude), "lng": float(b.longitude)}
+        dest = {"lat": float(b.latitude), "lng": float(b.longitude)}
 
         
         segments.append((origin, dest))
@@ -171,7 +224,7 @@ def reviews():
 @app.route('/viewTour/<tour_id>')
 def viewtour(tour_id):
     currtour = Tour.query.filter_by(id=tour_id).first()
-    return render_template('viewTour.html', tour=currtour.name, rating=currtour.average_rating,time=currtour.estimated_completion_time)
+    return render_template('viewTour.html',tour_id=tour_id, tour=currtour.name, rating=currtour.average_rating,time=currtour.estimated_completion_time)
 
 ##All of these will need to have login required but for testing reasons not doing that rn
 @app.route("/adminhome")
@@ -190,4 +243,5 @@ def adminfeedback():
 def adminreviews():
     return render_template('adminreviews.html')
 
-app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)

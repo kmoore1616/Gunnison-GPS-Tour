@@ -6,42 +6,36 @@ async function drawTourPolylines(map, tourId, AdvancedMarkerElement) { // This i
     const data = await res.json();
     const encodedList = data.polylines; // Error checking 
 
-    const bounds = new google.maps.LatLngBounds(); // Automatic centering
     const coords = data.segments;
-    
-    var i = 0;
 
-    for (const encoded of encodedList) { // Decode and draw each polyline
-        const longitude_org = coords[i][0].lat
-        const latitude_org = coords[i][0].lng
-        const longitude_dst = coords[i][1].lat
-        const latitude_dst = coords[i][1].lng
+    if (coords.length === 0) return;
 
-        const path = google.maps.geometry.encoding.decodePath(encoded);
+    const firstStop = coords[0][0];
+    map.setCenter({ lat: firstStop.lat, lng: firstStop.lng });
 
-        new AdvancedMarkerElement({
-            map,
-            position: { lat: latitude_org, lng: longitude_org},
-            title: "Origin " + i,
-        });
-        
+    new AdvancedMarkerElement({
+        map,
+        position: { lat: firstStop.lat, lng: firstStop.lng },
+        title: "Stop 1",
+    });
+
+    for (let i = 0; i < coords.length; i += 1) {
+        const latitude_org = coords[i][0].lat
+        const longitude_org = coords[i][0].lng
+        const latitude_dst = coords[i][1].lat
+        const longitude_dst = coords[i][1].lng
+
         new AdvancedMarkerElement({
             map,
             position: { lat: latitude_dst, lng: longitude_dst},
-            title: "Origin " + i,
-        });
-        
-        new google.maps.Polyline({
-            path,
-            map,
-            strokeWeight: 5,
+            title: "Stop " + (i + 2),
         });
 
-            path.forEach((p) => bounds.extend(p)); // Automatic center
+        const encoded = encodedList[i];
+        if (!encoded) continue;
 
-        if (!bounds.isEmpty()) {
-            map.fitBounds(bounds); // Sets center to the route
-        }
+        const path = google.maps.geometry.encoding.decodePath(encoded);
+        new google.maps.Polyline({ path, map, strokeWeight: 5 });
     }
 }
 
@@ -57,10 +51,11 @@ async function initMap() {
 
     map.setOptions({ mapTypeControl: false });
 
-    const tourId = 1;
+    const tourId = document.getElementById("tour-id").innerHTML;
     console.log(tourId);
     await drawTourPolylines(map, tourId, AdvancedMarkerElement);
 
 }
+
 
 initMap().catch(console.error);
