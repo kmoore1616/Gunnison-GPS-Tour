@@ -1,0 +1,12 @@
+{% block title %} GCC Login {% endblock %}
+{% block content %}
+<body>
+<!--Have to add js-->
+    <script src="/static/verification.js"></script>
+    <p>Welcome Back!</p>
+    Patron: <input type="text" id="username"><br>
+    Password: <input type="password" id="password"><br>
+    <button onclick="login()" id="button">Sign in</button><br>
+    <p id="error"></p>
+</body>
+{% endblock %}

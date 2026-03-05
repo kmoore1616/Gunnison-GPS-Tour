@@ -217,6 +217,7 @@ def contact():
 def feedback():
     return render_template('feedback.html')
 
+##I don't think reviews exists. I also don't think it is its own page just an addon to the tour ovwerview unless we do want a reviews page
 @app.route("/reviews")
 def reviews():
     return render_template('reviews.html')
