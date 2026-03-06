@@ -217,17 +217,12 @@ def contact():
 def feedback():
     return render_template('feedback.html')
 
-##I don't think reviews exists. I also don't think it is its own page just an addon to the tour ovwerview unless we do want a reviews page
-@app.route("/reviews")
-def reviews():
-    return render_template('reviews.html')
-
 @app.route('/viewTour/<tour_id>')
 def viewtour(tour_id):
     currtour = Tour.query.filter_by(id=tour_id).first()
     return render_template('viewTour.html',tour_id=tour_id, tour=currtour.name, rating=currtour.average_rating,time=currtour.estimated_completion_time)
 
-##All of these will need to have login required but for testing reasons not doing that rn
+## TODO All of these will need to have login required
 @app.route("/adminhome")
 def adminhome():
     return render_template('adminhome.html')
