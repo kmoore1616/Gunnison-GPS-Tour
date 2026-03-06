@@ -48,11 +48,6 @@ class Review(db.Model):
 with app.app_context():
     db.create_all()
 
-@app.route("/admin/tours")
-def tours():
-    tours = Tour.query.all()
-    return render_template("viewTour.html", tours=tours)
-
 avalible_tours = ["Historic Tour", "Art Tour", "Campus Tour", "Nature Tour"]
 
 @app.route("/")
@@ -93,11 +88,11 @@ def tours():
     return render_template('edittours.html')
 
 @app.route('/adminfeedback')
-def feedback():
+def view_feedback():
     return render_template('adminfeedback.html')
 
 @app.route('/adminreviews')
-def reviews():
+def view_reviews():
     return render_template('adminreviews.html')
 
 app.run(debug=True)
