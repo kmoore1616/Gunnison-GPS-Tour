@@ -182,7 +182,6 @@ def get_tour_poly(tour_id):
 
     return jsonify({"tourId": tour_id, "polylines": polylines, "segments": segments}) # Send data to JS
 
->>>>>>> origin/main
 
 @app.route("/")
 def root():
