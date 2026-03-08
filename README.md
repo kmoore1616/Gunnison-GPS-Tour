@@ -1,6 +1,4 @@
-# Gunnison-GPS-Tour
-An Application to facilitate tours for Gunnison CO
+# Gunnison GPS Tour
+Gunnison GPS Tour is a Flask web app for browsing local tours and viewing a tour-specific walking route on an interactive Google Map. The app stores tours, places, and reviews in SQLite (`gps-database.sqlite`), orders each tour's stops through the `tour_places` table, and serves encoded route polylines from `/get_tour_poly/<tour_id>` so the frontend can draw paths and markers. Current user-facing routes include `/`, `/Tours`, `/Places`, `/Tour`, `/Contact`, and `/viewTour/<tour_id>`, with admin templates wired at `/adminhome`, `/edittours`, `/adminfeedback`, and `/adminreviews`.
 
-Ryan Branstorm
-Kyle Moore
-Connor Neal
+To run locally, use Python and install dependencies with `pip install flask flask-sqlalchemy flask-login python-dotenv requests`. Create a `.env` file in the project root with `MAPS_API_KEY=your_google_maps_key`, then start the app with `python app.py` and open `http://127.0.0.1:5000`.
