@@ -5,13 +5,19 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from dotenv import load_dotenv
 from sqlalchemy import text
+from flask_json import json_response
 
 load_dotenv()
 api_key = os.getenv("MAPS_API_KEY")
+secret_key = os.getenv("SECRET_KEY")
 
 app = Flask(__name__, static_url_path='/static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gps-database.sqlite'
+app.config['SECRET_KEY'] = secret_key
+app.config['JSON_ADD_STATUS'] = False
 db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.init_app(app)
 
 tour_places = db.Table(
     "tour_places",
@@ -66,6 +72,10 @@ class Review(db.Model):
 
 with app.app_context():
     db.create_all()
+
+@login_manager.user_loader
+def load_user(id):
+    return Admin.query.get(id)
 
 
 # Helper function that calls routes api
@@ -229,20 +239,52 @@ def viewtour(tour_id):
 
 ##All of these will need to have login required but for testing reasons not doing that rn
 @app.route("/adminhome")
+@login_required
 def adminhome():
     return render_template('adminhome.html')
 
 @app.route("/edittours")
+@login_required
 def edittours():
     return render_template('edittours.html')
 
 @app.route("/adminfeedback")
+@login_required
 def adminfeedback():
     return render_template('adminfeedback.html')
 
 @app.route("/adminreviews")
+@login_required
 def adminreviews():
     return render_template('adminreviews.html')
+
+@app.route('/login')
+def login():
+    return render_template('adminlogin.html')
+
+@app.route('/api/login', methods=['POST'])
+def checkLogin():
+    data = request.get_json(force=True)
+    username = data['username']
+    password = data['password']
+    if (username == ""):
+        return json_response(text="Username can't be nothing")
+    if (password == ""):
+        return json_response(text="Password can't be nothing")
+    user = Admin.query.filter_by(username=username).first()
+    if user is None:
+        return json_response(text="Incorrect username or password")
+    if user.password == password:
+        login_user(user)
+        return json_response(text="success")
+    else:
+        return json_response(text="Incorrect username or password")
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/adminlogin')
 
 if __name__ == "__main__":
     app.run(debug=True)
