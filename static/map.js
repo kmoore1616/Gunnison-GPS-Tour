@@ -1,3 +1,19 @@
+"use strict";
+/**
+ * @license
+ * Copyright 2025 Google LLC. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+let id;
+let target;
+let options;
+let userMarkers = [];
+let userRoutes = [];
+let testVar = 0;
+
+const mapElement = document.querySelector('gmp-map');
+
 async function drawTourPolylines(map, tourId, AdvancedMarkerElement) { // This is what draws all routes
     console.log(tourId);
     const res = await fetch(`/get_tour_poly/${tourId}`); // Get list of polylines
