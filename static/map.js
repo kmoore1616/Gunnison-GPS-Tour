@@ -1,3 +1,32 @@
+"use strict";
+/**
+ * @license
+ * Copyright 2025 Google LLC. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+let id;
+let target;
+let options;
+let userMarkers = [];
+let userRoutes = [];
+let testVar = 0;
+
+const mapElement = document.querySelector('gmp-map');
+
+const destinationLatLng = { lat: 38.54472787327966, lng: -106.92136913002805 }; // Gunnison Visitor Center for testing
+
+target = {
+    latitude: 38.54539051786304,
+    longitude: -106.91779120648226,
+};
+
+options = {
+    enableHighAccuracy: false,
+    timeout: 5000,
+    maximumAge: 0,
+};
+
 async function drawTourPolylines(map, tourId, AdvancedMarkerElement) { // This is what draws all routes
     console.log(tourId);
     const res = await fetch(`/get_tour_poly/${tourId}`); // Get list of polylines
@@ -40,6 +69,83 @@ async function drawTourPolylines(map, tourId, AdvancedMarkerElement) { // This i
 }
 
 
+async function success(pos) {
+    const { AdvancedMarkerElement, PinElement } = (await google.maps.importLibrary('marker'));
+
+    testVar = testVar + 1;
+    const crd = pos.coords;
+    console.log("Hit " + testVar + ": " + crd.latitude + ", " + crd.longitude)
+
+    if(userMarkers.length != 0) {
+        userMarkers[0].map = null;
+        userMarkers = [];
+    }
+
+    //create marker at user position
+    const userPin = new PinElement({
+        //@ts-ignore
+        scale: 1.5,
+        background: '#4285F4',
+        borderColor: 'white',
+        glyphColor: 'white',
+    });
+    const userMarker = new AdvancedMarkerElement({
+        position: { lat: crd.latitude, lng: crd.longitude },
+    });
+    userMarker.append(userPin);
+    mapElement.append(userMarker);
+
+    userMarkers.push(userMarker);
+
+    // Call to routing function
+    createRoute(crd.latitude, crd.longitude);
+
+    if (target.latitude === crd.latitude && target.longitude === crd.longitude) {
+        console.log("Congratulations, you reached the target");
+        navigator.geolocation.clearWatch(id);
+    }
+}
+
+
+function error(err) {
+    console.error(`ERROR(${err.code}): ${err.message}`);
+}
+
+async function createRoute(lat, lng) {
+    const { Route } = await google.maps.importLibrary('routes');
+    if(userRoutes.length != 0) {
+        for(let i = 0; i < userRoutes.length; i++) {
+            userRoutes[i].setMap(null);
+        }
+        userRoutes = [];
+    }
+
+    //create route
+    const request = {
+        origin: { lat: lat, lng: lng },
+        destination: destinationLatLng,
+        travelMode: 'WALKING',
+        fields: ['path'],
+    };
+
+    await customElements.whenDefined('gmp-map');
+    const map = mapElement.innerMap;
+
+    const { routes } = await Route.computeRoutes(request);
+
+    if (routes && routes.length > 0) {
+        const routePath = new google.maps.Polyline({
+            path: routes[0].path,
+            strokeColor: '#4285F4',
+            strokeWeight: 5,
+        });
+
+        routePath.setMap(map);
+        userRoutes.push(routePath);
+    }
+}
+
+
 async function initMap() {
     // Load libraries once, the right way
     await google.maps.importLibrary("maps");
@@ -55,7 +161,7 @@ async function initMap() {
     console.log(tourId);
     await drawTourPolylines(map, tourId, AdvancedMarkerElement);
 
+    id = navigator.geolocation.watchPosition(success, error, options);
 }
-
 
 initMap().catch(console.error);
