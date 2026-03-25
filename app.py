@@ -8,6 +8,7 @@ from map import register_map_routes
 from model import Admin, init_db
 from routes import register_routes
 
+
 load_dotenv()
 
 login_manager = LoginManager()
