@@ -58,7 +58,32 @@ def register_routes(app):
     @app.route("/edittours")
     @login_required
     def edittours():
-        return render_template("edittours.html")
+        tours = Tour.query.all()
+        return render_template(
+            "edittours.html",
+            tours=tours
+        )
+
+    @app.route("/createTour", methods=["GET", "POST"])
+    @login_required
+    def createtour():
+        if(request.method == "GET"):
+            return render_template("createTour.html")
+        else:
+            return redirect("/edittours")
+
+    @app.route("/editTour/<tour_id>", methods=["GET", "POST"])
+    @login_required
+    def edittour(tour_id):
+        if(request.method == "GET"):
+            currtour = Tour.query.filter_by(id=tour_id).first()
+            return render_template(
+                "editTour.html",
+                tour_id=tour_id,
+                tour=currtour.name
+            )
+        else:
+            return redirect("/edittours")
 
     @app.route("/adminfeedback")
     @login_required

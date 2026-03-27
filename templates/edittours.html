@@ -3,5 +3,19 @@
 {% block content %}
 <body id="home">
     <h1>Tours</h1>
+    <table>
+        <tr>
+            <th>TOUR</th>
+            <th>LENGTH</th>
+            <th>RATING</th>
+        </tr>
+        {% for t in tours %}
+            <tr>
+                <td>{{ t.name }}</td>
+                <td>{{ t.estimated_completion_time }}</td>
+                <td>{{ t.average_rating }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 </body>
 {% endblock %}
