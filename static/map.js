@@ -5,42 +5,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-let id;
-let target;
-let options;
+let id, target, coords;
 let userMarkers = [];
 let userRoutes = [];
 let testVar = 0;
+let iterator = 1;
 
 const mapElement = document.querySelector('gmp-map');
-
-const destinationLatLng = { lat: 38.54472787327966, lng: -106.92136913002805 }; // Gunnison Visitor Center for testing
-
-target = {
-    latitude: 38.54539051786304,
-    longitude: -106.91779120648226,
-};
-
-options = {
+const options = {
     enableHighAccuracy: false,
     timeout: 5000,
     maximumAge: 0,
 };
 
-async function drawTourPolylines(map, tourId, AdvancedMarkerElement) { // This is what draws all routes
-    console.log(tourId);
+
+// Draw the lines between each stop on the tour
+async function drawTourPolylines(map, tourId, AdvancedMarkerElement) {
+    console.log("Tour ID: " + tourId);
     const res = await fetch(`/get_tour_poly/${tourId}`); // Get list of polylines
     if (!res.ok) throw new Error(await res.text());
 
     const data = await res.json();
     const encodedList = data.polylines; // Error checking 
 
-    const coords = data.segments;
+    coords = data.segments;
 
     if (coords.length === 0) return;
 
     const firstStop = coords[0][0];
     map.setCenter({ lat: firstStop.lat, lng: firstStop.lng });
+
+    target = { lat: firstStop.lat, lng: firstStop.lng };
 
     new AdvancedMarkerElement({
         map,
@@ -69,19 +64,16 @@ async function drawTourPolylines(map, tourId, AdvancedMarkerElement) { // This i
 }
 
 
-async function success(pos) {
+// Draw the marker for the user's current location
+async function drawUserPolyline(crd) {
     const { AdvancedMarkerElement, PinElement } = (await google.maps.importLibrary('marker'));
-
-    testVar = testVar + 1;
-    const crd = pos.coords;
-    console.log("Hit " + testVar + ": " + crd.latitude + ", " + crd.longitude)
 
     if(userMarkers.length != 0) {
         userMarkers[0].map = null;
         userMarkers = [];
     }
 
-    //create marker at user position
+    // Create marker at user position
     const userPin = new PinElement({
         //@ts-ignore
         scale: 1.5,
@@ -99,20 +91,13 @@ async function success(pos) {
 
     // Call to routing function
     createRoute(crd.latitude, crd.longitude);
-
-    if (target.latitude === crd.latitude && target.longitude === crd.longitude) {
-        console.log("Congratulations, you reached the target");
-        navigator.geolocation.clearWatch(id);
-    }
 }
 
 
-function error(err) {
-    console.error(`ERROR(${err.code}): ${err.message}`);
-}
-
+// Draw line from user to the next stop on the tour
 async function createRoute(lat, lng) {
     const { Route } = await google.maps.importLibrary('routes');
+
     if(userRoutes.length != 0) {
         for(let i = 0; i < userRoutes.length; i++) {
             userRoutes[i].setMap(null);
@@ -120,10 +105,10 @@ async function createRoute(lat, lng) {
         userRoutes = [];
     }
 
-    //create route
+    // Compute route
     const request = {
         origin: { lat: lat, lng: lng },
-        destination: destinationLatLng,
+        destination: { lat: target.lat, lng: target.lng },
         travelMode: 'WALKING',
         fields: ['path'],
     };
@@ -133,6 +118,7 @@ async function createRoute(lat, lng) {
 
     const { routes } = await Route.computeRoutes(request);
 
+    // Draw route path on map
     if (routes && routes.length > 0) {
         const routePath = new google.maps.Polyline({
             path: routes[0].path,
@@ -146,6 +132,31 @@ async function createRoute(lat, lng) {
 }
 
 
+// Live location tracking
+async function success(pos) {
+    const crd = pos.coords;
+    testVar = testVar + 1;
+    console.log("Hit " + testVar + ": " + crd.latitude + ", " + crd.longitude);
+
+    drawUserPolyline(crd);
+
+    if (target.lat === crd.latitude && target.lng === crd.longitude) {
+        console.log("Congratulations, you reached the target");
+        target = { lat: coords[iterator][1].lat, lng: coords[iterator][1].lng };
+        iterator = iterator + 1;
+        if (iterator == coords.length) {
+            navigator.geolocation.clearWatch(id);
+        }
+    }
+}
+
+
+function error(err) {
+    console.error(`ERROR(${err.code}): ${err.message}`);
+}
+
+
+// Map initialization function
 async function initMap() {
     // Load libraries once, the right way
     await google.maps.importLibrary("maps");
@@ -158,10 +169,11 @@ async function initMap() {
     map.setOptions({ mapTypeControl: false });
 
     const tourId = document.getElementById("tour-id").innerHTML;
-    console.log(tourId);
     await drawTourPolylines(map, tourId, AdvancedMarkerElement);
 
+    // Live location tracking -> calls the success function on update
     id = navigator.geolocation.watchPosition(success, error, options);
 }
+
 
 initMap().catch(console.error);
