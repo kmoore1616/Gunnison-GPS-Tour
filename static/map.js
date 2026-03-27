@@ -10,6 +10,13 @@ let userMarkers = [];
 let userRoutes = [];
 let testVar = 0;
 let iterator = 1;
+let globalMap;
+let root = "http://127.0.0.1:5000/";
+let route = [];
+let current_stop = 0;
+
+document.getElementById("skipButton").addEventListener("click", skipStop);
+document.getElementById("endButton").addEventListener("click", endTour);
 
 const mapElement = document.querySelector('gmp-map');
 const options = {
@@ -21,12 +28,11 @@ const options = {
 
 // Draw the lines between each stop on the tour
 async function drawTourPolylines(map, tourId, AdvancedMarkerElement) {
-    console.log("Tour ID: " + tourId);
     const res = await fetch(`/get_tour_poly/${tourId}`); // Get list of polylines
     if (!res.ok) throw new Error(await res.text());
 
     const data = await res.json();
-    const encodedList = data.polylines; // Error checking 
+    const encodedList = data.polylines; // Error checking
 
     coords = data.segments;
 
@@ -48,6 +54,8 @@ async function drawTourPolylines(map, tourId, AdvancedMarkerElement) {
         const longitude_org = coords[i][0].lng
         const latitude_dst = coords[i][1].lat
         const longitude_dst = coords[i][1].lng
+
+        route.push([latitude_dst, longitude_dst]);
 
         new AdvancedMarkerElement({
             map,
@@ -165,6 +173,7 @@ async function initMap() {
 
     const mapElement = document.querySelector("gmp-map");
     const map = mapElement.innerMap;
+    globalMap = map;
 
     map.setOptions({ mapTypeControl: false });
 
@@ -175,5 +184,23 @@ async function initMap() {
     id = navigator.geolocation.watchPosition(success, error, options);
 }
 
+export function endTour() {
+    // TODO Popup functionality and feedback goes here
+    alert("Tour Ended");
+    window.location.replace(root)
+
+}
+
+export function skipStop() {
+    current_stop++;
+    if(current_stop > route.length - 1) {
+       alert("TOUR Finished!");
+       window.location.replace(root)
+    }else {
+        let latlng = {lat: route[current_stop][0], lng: route[current_stop][1]};
+        globalMap.panTo(latlng);
+        alert("Stop Skipped!");
+    }
+}
 
 initMap().catch(console.error);
