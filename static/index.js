@@ -1,3 +1,9 @@
+
+
+// THIS FILE'S FUNCTIONALITY HAS MOVED TO map.js
+// THIS FILE WILL BE REMOVED AT THE END OF BRANCH GPS-63-2
+
+
 "use strict";
 /**
  * @license
@@ -10,7 +16,6 @@ let target;
 let options;
 let userMarkers = [];
 let userRoutes = [];
-let userLocation;
 let testVar = 0;
 
 const mapElement = document.querySelector('gmp-map');
