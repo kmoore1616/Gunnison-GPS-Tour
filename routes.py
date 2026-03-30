@@ -1,7 +1,7 @@
 from flask import abort, jsonify, redirect, render_template, request
 from flask_login import login_required, login_user, logout_user
 
-from model import Admin, Tour
+from model import Admin, Tour, Feedback, db, Review
 
 
 def json_response(text):
@@ -99,3 +99,17 @@ def register_routes(app):
     def logout():
         logout_user()
         return redirect("/login")
+
+    @app.route('/popup')
+    def popup():
+        return render_template('popup.html')
+
+    @app.route('/tourfeedback', methods=['GET', 'POST'])
+    def tourreview():
+        if request.method == 'POST':
+            comment = request.form['comment']
+            rating = int(request.form.get("rating", 0))
+            review = Review(rating=rating, comment=comment, tour_id=...)
+            db.session.add(review)
+            db.session.commit()
+            return redirect('/')
