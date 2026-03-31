@@ -102,14 +102,16 @@ def register_routes(app):
 
     @app.route('/popup')
     def popup():
-        return render_template('popup.html')
+        tour_id = request.args.get('tour_id')
+        return render_template('popup.html', tour_id=tour_id)
 
     @app.route('/tourfeedback', methods=['GET', 'POST'])
     def tourreview():
         if request.method == 'POST':
             comment = request.form['comment']
             rating = int(request.form.get("rating", 0))
-            review = Review(rating=rating, comment=comment, tour_id=...)
+            tour_id = int(request.form.get("tour_id"))
+            review = Review(rating=rating, comment=comment, tour_id=tour_id)
             db.session.add(review)
             db.session.commit()
-            return redirect('/')
+        return redirect('/')

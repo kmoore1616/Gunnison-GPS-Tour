@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import {openPopup} from './popup.js'
+
 let id, target, coords;
 let userMarkers = [];
 let userRoutes = [];
@@ -15,8 +17,10 @@ let root = "http://127.0.0.1:5000/";
 let route = [];
 let current_stop = 0;
 
+const tour_id = document.getElementById("tour_id").value;
+
 document.getElementById("skipButton").addEventListener("click", skipStop);
-document.getElementById("endButton").addEventListener("click", endTour);
+document.getElementById("endButton").addEventListener('click', () => endTour(tour_id))
 
 const mapElement = document.querySelector('gmp-map');
 const options = {
@@ -184,22 +188,17 @@ async function initMap() {
     id = navigator.geolocation.watchPosition(success, error, options);
 }
 
-export function endTour() {
-    // TODO Popup functionality and feedback goes here
-    alert("Tour Ended");
-    window.location.replace(root)
-
+export function endTour(tour_id) {
+    openPopup(tour_id);
 }
 
 export function skipStop() {
     current_stop++;
     if(current_stop > route.length - 1) {
-       alert("TOUR Finished!");
-       window.location.replace(root)
+       endTour()
     }else {
         let latlng = {lat: route[current_stop][0], lng: route[current_stop][1]};
         globalMap.panTo(latlng);
-        alert("Stop Skipped!");
     }
 }
 
