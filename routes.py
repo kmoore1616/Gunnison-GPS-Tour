@@ -68,7 +68,17 @@ def register_routes(app):
     @app.route("/adminreviews")
     @login_required
     def adminreviews():
-        return render_template("adminreviews.html")
+
+        dropdown = Tour.query.all()
+        tourdropdown = [(k.id,k.name) for k in dropdown]
+
+        tour_id=request.args.get('tour_id',type=int)
+        if tour_id:
+            entries = Review.query.filter_by(tour_id=tour_id).order_by(Review.id.desc()).all()
+        else:
+            entries = Review.query.all()
+        col = [(r.id, r.rating, r.comment, r.tour.name) for r in entries]
+        return render_template("adminreviews.html", col=col,tourdropdown=tourdropdown)
 
     @app.route("/login")
     def login():
@@ -113,3 +123,11 @@ def register_routes(app):
             db.session.add(review)
             db.session.commit()
             return redirect('/')
+
+    @app.route('/delete/<int:id>', methods=['POST'])
+    @login_required
+    def delete(id):
+        res = Review.query.filter_by(id=id).first()
+        db.session.delete(res)
+        db.session.commit()
+        return '',204
