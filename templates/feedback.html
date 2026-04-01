@@ -1,5 +1,16 @@
 {% extends "visitornav.html" %}
 {% block content %}
+
+{% if success == "True" %}
+<script>
+    alert("Feedback sent successfully.");
+</script>
+{% elif success == "False" %}
+<script>
+    alert("Failed to send feedback.\nFields cannot be empty");
+</script>
+{% endif %}
+
 <h1> Submit Feedback </h1>
 <form action="{{ url_for('feedback') }}" method="post">
     Name:<br>

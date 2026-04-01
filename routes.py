@@ -40,10 +40,21 @@ def register_routes(app):
             name = request.form['name']
             email = request.form['mail']
             feedback = request.form["comment"]
-            if(send_feedback_email(name, email, feedback)):
-                print("Email sent successfully!")
 
-        return render_template("feedback.html")
+            valid = name.strip() or email.strip() or feedback.strip()
+
+            if not valid:
+                return render_template("feedback.html", success="False")
+
+
+            if(send_feedback_email(name, email, feedback)):
+                return render_template("feedback.html", success="True")
+            else:
+                return render_template("feedback.html", success="False")
+        else:
+            return render_template("feedback.html", success="GET")
+
+
 
     @app.route("/viewTour/<tour_id>")
     def viewtour(tour_id):
