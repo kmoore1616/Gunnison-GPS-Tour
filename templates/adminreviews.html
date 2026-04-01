@@ -2,6 +2,25 @@
 {% block title %} Reviews {% endblock %}
 {% block content %}
 <body id="home">
+    <script src="/static/deletereview.js"></script>
     <h1>Reviews</h1>
+        <div class="dropdown">
+      <button class="dropdownbtn">Filter</button>
+      <div class="dropdown-content">
+          <a href="/adminreviews">All</a>
+          {% for i in tourdropdown %}
+        <a href="/adminreviews?tour_id={{ i[0] }}">{{ i[1] }}</a>
+          {% endfor %}
+
+      </div>
+    </div>
+  <table>
+    {% for i in col %}
+    <tr>
+      <td>{{ i[3] }}<br>Rating: {{ i[1] }}<br>{{ i[2] }}</td>
+        <td><button onclick="deleteReview({{ i[0] }})">Delete</button></td>
+    </tr>
+    {% endfor %}
+  </table>
 </body>
 {% endblock %}
