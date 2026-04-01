@@ -1,7 +1,7 @@
 from flask import abort, jsonify, redirect, render_template, request
 from flask_login import login_required, login_user, logout_user
 
-from model import Admin, Tour, Feedback, db, Review
+from model import Admin, Tour, Feedback, db, Review, tour_places, Place
 
 
 def json_response(text):
@@ -42,12 +42,18 @@ def register_routes(app):
     def viewtour(tour_id):
         currtour = Tour.query.filter_by(id=tour_id).first()
 
+        places = db.session.query(Place).join(tour_places, tour_places.c.place_id == Place.id).filter(tour_places.c.tour_id == tour_id).all()
+
+        col = [(p.id, p.name, p.description)
+               for p in places]
+
         return render_template(
             "viewTour.html",
             tour_id=tour_id,
             tour=currtour.name,
             rating=currtour.average_rating,
             time=currtour.estimated_completion_time,
+            col=col
         )
 
     @app.route("/adminhome")
