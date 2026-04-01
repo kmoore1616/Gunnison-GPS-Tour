@@ -2,7 +2,8 @@ from flask import abort, jsonify, redirect, render_template, request
 from flask_login import login_required, login_user, logout_user
 
 from model import Admin, Tour, Feedback, db, Review, tour_places, Place
-
+from mail import send_feedback_email
+from model import Admin, Tour
 
 def json_response(text):
     return jsonify({"text": text})
@@ -34,9 +35,27 @@ def register_routes(app):
     def contact():
         return render_template("contact.html")
 
-    @app.route("/feedback")
+    @app.route("/feedback", methods=["GET", "POST"])
     def feedback():
-        return render_template("feedback.html")
+        if request.method == "POST":
+            name = request.form['name']
+            email = request.form['mail']
+            feedback = request.form["comment"]
+
+            valid = name.strip() or email.strip() or feedback.strip()
+
+            if not valid:
+                return render_template("feedback.html", success="False")
+
+
+            if(send_feedback_email(name, email, feedback)):
+                return render_template("feedback.html", success="True")
+            else:
+                return render_template("feedback.html", success="False")
+        else:
+            return render_template("feedback.html", success="GET")
+
+
 
     @app.route("/viewTour/<tour_id>")
     def viewtour(tour_id):
