@@ -2,6 +2,20 @@
 {% block title %} Tours {% endblock %}
 {% block content %}
 
+<!--Filter by tour length, rating (alphabetically if there's time)-->
+        <div class="dropdown">
+      <button class="dropdownbtn">Filter</button>
+      <div class="dropdown-content">
+        <a href="/Tours?sort_tour=longest">Longest</a>
+          <a href="/Tours?sort_tour=shortest">Shortest</a>
+          <a href="/Tours?sort_tour=highreview">Highest Reviews</a>
+          <a href="/Tours?sort_tour=lowreview">Lowest Reviews</a>
+          <a href="/Tours?sort_tour=atoz">A-Z</a>
+          <a href="/Tours?sort_tour=zatoa">Z-A</a>
+          <a href="/Tours">Reset Filter</a>
+
+      </div>
+    </div>
 <h1> Current Tours </h1>
   <table>
     {% for i in col %}
@@ -12,7 +26,9 @@
     <tr>
         <td>{{ i[2] }}</td>  <!-- tour description -->
     </tr>
+          <tr>
+        <td>{{ i[3] }}</td> <!--Rating-->
+    </tr>
     {% endfor %}
   </table>
 {% endblock %}
-
