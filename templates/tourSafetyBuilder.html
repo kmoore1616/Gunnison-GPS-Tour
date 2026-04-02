@@ -1,0 +1,90 @@
+{% extends "adminnav.html" %}
+{% block title %}Tour Safety Builder{% endblock %}
+{% block content %}
+<style>
+    .tour-builder {
+        padding: 1.5rem;
+    }
+
+    .tour-builder__controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .tour-builder__map {
+        width: 100%;
+        min-height: 28rem;
+        border: 2px solid #1f2937;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .tour-builder__panel {
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        max-width: 48rem;
+    }
+
+    .tour-builder__panel p,
+    .tour-builder__panel li {
+        margin: 0.4rem 0;
+    }
+</style>
+
+<section class="tour-builder">
+    <h1>Tour Safety Builder</h1>
+    <p>Click the map to place stops. Switch to danger zone mode to trace highways or other unsafe segments that should trigger a warning.</p>
+
+    <input type="hidden" id="map-center-lat" value="38.5449">
+    <input type="hidden" id="map-center-lng" value="-106.9260">
+    <input type="hidden" id="tour-stop-data" name="tour_stop_data">
+    <input type="hidden" id="danger-zone-data" name="danger_zone_data">
+
+    <div class="tour-builder__controls">
+        <button type="button" id="add-stop-mode">Place Stops</button>
+        <button type="button" id="add-danger-mode">Draw Danger Zones</button>
+        <button type="button" id="finish-danger-polyline">Finish Danger Zone</button>
+        <button type="button" id="clear-stops">Clear Stops</button>
+        <button type="button" id="clear-danger-zones">Clear Danger Zones</button>
+    </div>
+
+    <p><strong>Current mode:</strong> <span id="map-mode">Stop placement</span></p>
+
+    <div id="tour-safety-map" class="tour-builder__map"></div>
+
+    <section class="tour-builder__panel">
+        <h2>Safety Warnings</h2>
+        <p id="route-warning-summary">No dangerous route crossings detected.</p>
+        <ul id="route-warning-list"></ul>
+    </section>
+</section>
+
+<script src="{{ url_for('static', filename='tourSafetyMap.js') }}"></script>
+<script>
+    (g => {
+        var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window;
+        b = b[c] || (b[c] = {});
+        var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => {
+            await (a = m.createElement("script"));
+            e.set("libraries", [...r] + "");
+            for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]);
+            e.set("callback", c + ".maps." + q);
+            a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
+            d[q] = f;
+            a.onerror = () => h = n(Error(p + " could not load."));
+            a.nonce = m.querySelector("script[nonce]")?.nonce || "";
+            m.head.append(a);
+        }));
+        d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n));
+    })({
+        key: "AIzaSyA5NCmT4YZvoa5KVQcOF1XHN3B8PxNpapQ",
+        v: "weekly"
+    });
+
+    google.maps.importLibrary("maps").then(window.initTourSafetyMap);
+</script>
+{% endblock %}

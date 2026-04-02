@@ -85,6 +85,11 @@ def register_routes(app):
     def edittours():
         return render_template("edittours.html")
 
+    @app.route("/tour-safety-builder")
+    @login_required
+    def tour_safety_builder():
+        return render_template("tourSafetyBuilder.html")
+
     @app.route("/adminfeedback")
     @login_required
     def adminfeedback():
@@ -158,4 +163,3 @@ def register_routes(app):
         db.session.delete(res)
         db.session.commit()
         return '',204
-
