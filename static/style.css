@@ -174,6 +174,83 @@ ul li a:hover {
   border-radius: 0.5rem;
 }
 
+.dropbtn {
+  background-color: #04AA6D;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  left: 0;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {background-color: #f1f1f1;}
+
+.dropdown:hover .dropdown-content {display: block;}
+
+.dropdown:hover .dropbtn {background-color: #3e8e41;}
+
+.loginbox{
+    min-height: 20vh;
+    min-width: 50vh;
+    background-color: #f5deb3;
+    padding: 4%;
+    border-radius: 3% 3% 3% 3%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.loginbtn{
+  background-color: orange;
+  color: white;
+  padding: 8px;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th,td {
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: grey;
+}
+
+gmp-map {
+    height: 800px;
+    width: 100%;
+}
+
 #admin-tour-list,
 #edit-tour-places {
   width: 50%;
@@ -190,7 +267,6 @@ ul li a:hover {
 .admin-tour-items td a,
 .edit-tour-items td {
   text-align: center;
-  padding: 8px;
 }
 
 #delete-tour-button {
