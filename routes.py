@@ -1,14 +1,18 @@
 from flask import abort, jsonify, redirect, render_template, request
 from flask_login import login_required, login_user, logout_user
+from flask_json import FlaskJSON, json_response, as_json
+from werkzeug.exceptions import BadRequestKeyError
 
-from model import Admin, Tour
+from model import Admin, Tour, db
 
 
-def json_response(text):
+def json_answer(text):
     return jsonify({"text": text})
 
 
 def register_routes(app):
+    json = FlaskJSON(app)
+
     @app.route("/")
     def root():
         return render_template("home.html")
@@ -64,26 +68,78 @@ def register_routes(app):
             tours=tours
         )
 
-    @app.route("/createTour", methods=["GET", "POST"])
+    @app.route("/createTour")
     @login_required
     def createtour():
-        if(request.method == "GET"):
-            return render_template("createTour.html")
-        else:
-            return redirect("/edittours")
+        tour = Tour(name="New Tour ",
+                    description="A brand new tour!",
+                    average_rating=0.0,
+                    estimated_completion_time=0,
+                    is_public=0
+                    )
 
-    @app.route("/editTour/<tour_id>", methods=["GET", "POST"])
+        db.session.add(tour)
+        db.session.commit()
+
+        tour = Tour.query.filter_by(name="New Tour ").first()
+        tour.name = tour.name + str(tour.id)
+
+        db.session.commit()
+
+        return render_template(
+            "editTour.html",
+            tour=tour
+        )
+
+    @app.route("/editTour/<tour_id>")
     @login_required
     def edittour(tour_id):
-        if(request.method == "GET"):
-            currtour = Tour.query.filter_by(id=tour_id).first()
-            return render_template(
-                "editTour.html",
-                tour_id=tour_id,
-                tour=currtour.name
-            )
-        else:
-            return redirect("/edittours")
+        tour = Tour.query.filter_by(id=tour_id).first()
+        return render_template(
+            "editTour.html",
+            tour=tour
+        )
+
+    @app.route("/saveTour/<tour_id>", methods=['POST'])
+    @login_required
+    def savetour(tour_id):
+
+        tour = Tour.query.filter_by(id=tour_id).first()
+        name = request.form['name']
+        description = request.form['description']
+        try:
+            is_public = request.form['is_public']
+        except BadRequestKeyError:
+            is_public = 0
+
+        if name != tour.name:
+            tour.name = name
+        if description != tour.description:
+            tour.description = description
+        if is_public != tour.is_public:
+            tour.is_public = is_public
+
+        db.session.commit()
+
+        return redirect("/edittours")
+
+    @app.route("/api/get_public", methods=['POST'])
+    @as_json
+    def get_public():
+        data = request.get_json(force=True)
+        name = data['name']
+        tour = Tour.query.filter_by(name=name).first()
+        return json_response(is_public=tour.is_public)
+
+    @app.route("/api/delete_tour", methods=['POST'])
+    @as_json
+    def delete_tour():
+        data = request.get_json(force=True)
+        name = data['name']
+        tour = Tour.query.filter_by(name=name).first()
+        db.session.delete(tour)
+        db.session.commit()
+        return json_response(result=0)
 
     @app.route("/adminfeedback")
     @login_required
@@ -105,19 +161,19 @@ def register_routes(app):
         username = data["username"]
         password = data["password"]
         if username == "":
-            return json_response(text="Username can't be nothing")
+            return json_answer(text="Username can't be nothing")
         if password == "":
-            return json_response(text="Password can't be nothing")
+            return json_answer(text="Password can't be nothing")
 
         user = Admin.query.filter_by(username=username).first()
         if user is None:
-            return json_response(text="Incorrect username or password")
+            return json_answer(text="Incorrect username or password")
 
         if user.password == password:
             login_user(user)
-            return json_response(text="success")
+            return json_answer(text="success")
 
-        return json_response(text="Incorrect username or password")
+        return json_answer(text="Incorrect username or password")
 
     @app.route("/logout")
     @login_required

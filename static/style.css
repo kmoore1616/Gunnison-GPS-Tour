@@ -174,17 +174,25 @@ ul li a:hover {
   border-radius: 0.5rem;
 }
 
-#admin-tour-list {
+#admin-tour-list,
+#edit-tour-places {
   width: 50%;
 }
 
-#admin-tour-headers th {
+#admin-tour-headers th,
+#edit-tour-headers th {
   font-style: bold;
 }
 
 #admin-tour-headers th,
+#edit-tour-headers th,
 .admin-tour-items td,
-.admin-tour-items td a {
+.admin-tour-items td a,
+.edit-tour-items td {
   text-align: center;
   padding: 8px;
+}
+
+#delete-tour-button {
+  background-color: red;
 }

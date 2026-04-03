@@ -2,6 +2,44 @@
 {% block title %} Tours {% endblock %}
 {% block content %}
 <body id="tourEditor">
-    <h1>Tour {{ tour_id }}: {{ tour }}</h1>
+    <script src="/static/tourEditor.js"></script>
+    <h1 id="editTourName">{{ tour.name }}</h1>
+    <h3>Tour Rating: {{ tour.average_rating }} Stars</h3>
+    <h3>Estimated Length: {{ tour.estimated_completion_time }} Minutes</h3>
+    <form action="/saveTour/{{tour.id}}" method="POST">
+        <fieldset>
+            <legend>Edit Tour</legend>
+
+            <label>Tour Name:</label>
+            <input type="text" name="name" value="{{tour.name}}" required>
+
+            <input type="checkbox" id="is_public" name="is_public">
+            <input type="hidden" value="{{tour.is_public}}">
+            <label for="is_public">Public</label><br><br>
+
+            <label>Tour Description:</label><br>
+            <textarea id="tour-description" name="description" maxlength="1000" rows="10" cols="50">{{tour.description}}</textarea>
+
+            <table id="edit-tour-places">
+                <tr id="edit-tour-headers">
+                    <th colspan="4">Tour Stops</th>
+                </tr>
+                <tr class="edit-tour-items">
+                    <td colspan="4">Add Stop</td>
+                </tr>
+                {% for p in tour.places %}
+                    <tr class="edit-tour-items">
+                        <td>{{p.name}}</td>
+                        <td><button type="button" onclick="movePlaceUp()">Move Up</button></td>
+                        <td><button type="button" onclick="movePlaceDown()">Move Down</button></td>
+                        <td><button type="button" onclick="removeStop()">Remove Stop</button></td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+            <input type="submit" value="SAVE">
+        </fieldset>
+    </form>
+    <button id="delete-tour-button" type="button" onclick="deleteTour()">DELETE TOUR</button>
 </body>
 {% endblock %}
