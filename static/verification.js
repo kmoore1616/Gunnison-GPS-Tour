@@ -1,5 +1,5 @@
 window.onload = function(){
-    var button = document.getElementById('loginbutton')
+    var button = document.getElementById('loginbutton');
     window.addEventListener("keyup", function (event) {
         if (event.keyCode == 13) {
             button.click();
