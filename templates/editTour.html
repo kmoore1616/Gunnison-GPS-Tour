@@ -14,7 +14,6 @@
             <input type="text" name="name" value="{{tour.name}}" required>
 
             <input type="checkbox" id="is_public" name="is_public">
-            <input type="hidden" value="{{tour.is_public}}">
             <label for="is_public">Public</label><br><br>
 
             <label>Tour Description:</label><br>
@@ -24,7 +23,7 @@
                 <tr id="edit-tour-headers">
                     <th colspan="4">Tour Stops</th>
                 </tr>
-                <tr class="edit-tour-items">
+                <tr id="add-stop-button">
                     <td colspan="4">Add Stop</td>
                 </tr>
                 {% for p in tour.places %}
