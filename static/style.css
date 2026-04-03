@@ -1,10 +1,18 @@
+body {
+    margin: 0;
+    background-color: white;
+    font-family: Poppins, "Poppins Fallback";
+    padding-bottom: 70px;
+}
+
 nav ul li { display: inline; }
 nav ul { list-style-type: none; }
 
 footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: none; /* hidden by default */
 }
 
 footer ul {
@@ -15,16 +23,11 @@ footer ul {
     margin: 0;
 }
 
-body {
-    margin: 0;
-    background-color: tan;
-}
-
 ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    background-color: #333333;
+    background: rgba(63, 143, 135, 1);
     display: flex;
     justify-content: flex-end;
 }
@@ -245,7 +248,185 @@ th,td {
 tr:nth-child(even) {
     background-color: grey;
 }
+
 gmp-map {
+    margin: 0 auto;
+    margin-left: 5%;
+    padding-bottom: 20px;
+    max-height: 50vh;
+    max-width: 80vh;
+}
+
+.sidebar {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+}
+
+.sidebar a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidebar a:hover {
+  color: rgba(222, 197, 61, 1);
+}
+
+.sidebar .closebtn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 36px;
+  margin-right: 50px;
+}
+
+.openbtn {
+  font-size: 20px;
+  cursor: pointer;
+  background-color: white;
+  color: rgba(63, 143, 135, 1);
+  padding: 15px;
+  border: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+}
+
+.openbtn:hover {
+  background-color: rgba(63, 143, 135, 1);
+  color: white;
+}
+
+#main {
+  transition: margin-right .5s;
+  padding: 16px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidebar { padding-top: 15px; }
+  .sidebar a { font-size: 18px; }
+}
+
+.topnav {
+  overflow: hidden;
+  background-color: rgba(63, 143, 135, 1);
+  position: relative;
+  height: 10vh;
+}
+
+.topnav #myLinks {
+  display: none;
+}
+
+.topnav a {
+  color: white;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+  display: block;
+}
+
+.topnav a.icon {
+  background: black;
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.navButton{
+    font-size: 20px;
+    cursor: pointer;
+    background-color: rgba(63, 143, 135, 1);
+    color: white;
+    border: none;
+    position: fixed;
+    bottom:80px;
+    right: 30px;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+}
+
+.title{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%
+}
+
+.homeContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 100vh;
+}
+
+.homePageNav {
+  min-height: 5vh;
+  min-width: 40vh;
+  background-color: #111;
+  padding: 4%;
+  border-radius: 3%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.homePageNav a{
+  text-align: center;
+  flex: block;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+
+}
+
+.homePageNav a:hover {
+  color: rgba(222, 197, 61, 1);
+}
+
+.homePageNav:hover{
+    background-color: rgba(45, 46, 50, 1);
+
     height: 800px;
     width: 100%;
-    }
+}
+
+#admin-tour-list,
+#edit-tour-places {
+  width: 50%;
+}
+
+#admin-tour-headers th,
+#edit-tour-headers th {
+  font-style: bold;
+}
+
+#admin-tour-headers th,
+#edit-tour-headers th,
+.admin-tour-items td,
+.admin-tour-items td a,
+.edit-tour-items td {
+  text-align: center;
+}
+
+#delete-tour-button {
+  background-color: red;
+}
