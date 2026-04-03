@@ -1,5 +1,6 @@
 from flask import abort, jsonify, redirect, render_template, request
 from flask_login import login_required, login_user, logout_user
+from sqlalchemy import func
 from flask_json import FlaskJSON, json_response, as_json
 from werkzeug.exceptions import BadRequestKeyError
 
@@ -21,9 +22,27 @@ def register_routes(app):
     @app.route("/Tours")
     def see_tours():
         col = []
-        entries = Tour.query.all()
+
+        sort_tour = request.args.get("sort_tour","none")
+
+        if sort_tour == "longest":
+            entries = Tour.query.order_by(Tour.estimated_completion_time.desc()).all()
+        elif sort_tour == "shortest":
+            entries = Tour.query.order_by(Tour.estimated_completion_time.asc()).all()
+        elif sort_tour == "highreview":
+            entries = Tour.query.join(Review).group_by(Tour.id).order_by(func.avg(Review.rating).desc()).all()
+        elif sort_tour == "lowreview":
+            entries = Tour.query.join(Review).group_by(Tour.id).order_by(func.avg(Review.rating).asc()).all()
+        elif sort_tour == "atoz":
+            entries = Tour.query.order_by(Tour.name.asc()).all()
+        elif sort_tour == "ztoa":
+            entries = Tour.query.order_by(Tour.name.desc()).all()
+        else:
+            entries = Tour.query.all()
+
         for entry in entries:
-            col.append([entry.id, entry.name, entry.description])
+            avg_rating = db.session.query(func.avg(Review.rating)).filter_by(tour_id=entry.id).scalar()
+            col.append([entry.id, entry.name, entry.description,avg_rating or "Be the first to review it"])
         return render_template("tour_list.html", col=col)
 
     @app.route("/Locations")
@@ -189,11 +208,6 @@ def register_routes(app):
         db.session.delete(tour)
         db.session.commit()
         return json_response(result=0)
-
-    @app.route("/adminfeedback")
-    @login_required
-    def adminfeedback():
-        return render_template("adminfeedback.html")
 
     @app.route("/adminreviews")
     @login_required
