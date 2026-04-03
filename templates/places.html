@@ -1,4 +1,25 @@
 {% extends "visitornav.html" %}
-{% block body %}
-<h1> Locations </h1>
+{% block content %}
+
+    <table>
+    {% for i in col %}
+    <tr>
+      <td>{{ i[1] }}</td><br> <!-- link to the location specific page-->
+    </tr>
+            <tr>
+      <td>{{ i[2] }}</td><br>
+    </tr>
+    {% endfor %}
+  </table>
+
+<h2>Tours featured on</h2>
+    <table>
+    {% for i in feat_tours %}
+    <tr>
+      <td><a href="/viewTour/{{ i.id }}">{{ i.name }}</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+
+    <div id="tour-id" hidden >{{ place_id }}</div>
 {% endblock %}

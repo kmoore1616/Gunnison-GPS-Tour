@@ -26,9 +26,33 @@ def register_routes(app):
             col.append([entry.id, entry.name, entry.description])
         return render_template("tour_list.html", col=col)
 
-    @app.route("/Places")
-    def place():
-        return render_template("places.html")
+    @app.route("/Locations")
+    def locations():
+        col = []
+
+        dropdown = Tour.query.all()
+        tourlocations = [(k.id, k.name) for k in dropdown]
+
+        tour_id=request.args.get('tour_id',type=int)
+        if tour_id:
+            entries = Place.query.join(tour_places, Place.id == tour_places.c.place_id).filter(tour_places.c.tour_id == tour_id).all()
+        else:
+            entries = Place.query.order_by(Place.name).all()
+
+        for k in entries:
+            col.append([k.id,k.name])
+        return render_template("locations.html",col=col,tourlocations=tourlocations)
+
+    @app.route("/Places/<place_id>")
+    def place(place_id):
+        col = []
+        entries = Place.query.filter_by(id=place_id).all()
+
+        feat_tours= Tour.query.join(tour_places,Tour.id==tour_places.c.tour_id).filter(tour_places.c.place_id==place_id).all()
+
+        for k in entries:
+            col.append([k.id,k.name,k.description])
+        return render_template("places.html", col=col,feat_tours=feat_tours)
 
     @app.route("/Tour")
     def tour():
