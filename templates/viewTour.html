@@ -2,6 +2,46 @@
 {% block head %}
     <title>View Tour</title>
     <style>
+    .tour-view {
+        padding: 0 0 8rem;
+    }
+
+    .tour-meta {
+        padding: 1rem;
+    }
+
+    .tour-actions {
+        position: sticky;
+        bottom: 4.5rem;
+        z-index: 10;
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        padding: 1rem;
+        margin: 0;
+    }
+
+    .tour-actions button {
+        min-width: 10rem;
+        padding: 0.85rem 1.25rem;
+        border: none;
+        border-radius: 999px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    #skipButton {
+        background: #f0b429;
+        color: #1f1f1f;
+    }
+
+    #endButton {
+        background: #b42318;
+        color: #fff;
+    }
+
     gmp-map {
         height: clamp(300px, 60vh, 700px);
         width: 100%;
@@ -9,6 +49,19 @@
     }
 
     @media (max-width: 600px) {
+        .tour-view {
+            padding-bottom: 9.5rem;
+        }
+
+        .tour-actions {
+            bottom: 4rem;
+            flex-direction: column;
+        }
+
+        .tour-actions button {
+            width: 100%;
+        }
+
         gmp-map {
             height: 50vh;
         }
@@ -22,8 +75,8 @@
 
 {% endblock %}
 {% block content %}
-
-<body id="view">
+<section id="view" class="tour-view">
+  <div class="tour-meta">
   <h1>Name: {{ tour }}</h1>
   <h1>Estimated time: {{ time }}</h1>
   <h1>Average Rating: {{ rating }}</h1>
@@ -36,11 +89,12 @@
     </tr>
     {% endfor %}
   </table>
+  </div>
 
     <div id="tour-id" hidden >{{ tour_id }}</div>
     <gmp-map center="38.54260065425841, -106.91915044613187" zoom="18" map-id="DEMO_MAP_ID">
     </gmp-map>
-</body>
+</section>
 
     <script type="module" src="../static/map.js"></script>
     <!-- prettier-ignore -->
@@ -49,9 +103,10 @@
     <script>
     </script>
 
-    <button type="button" id="skipButton">Skip Stop</button>
-    <button type="button" id="endButton">End Tour</button>
+    <div class="tour-actions">
+        <button type="button" id="skipButton">Skip Stop</button>
+        <button type="button" id="endButton">End Tour</button>
+    </div>
     <input type="hidden" id="tour_id" name="tour_id" value="{{ tour_id }}">
 
 {% endblock %}
-
