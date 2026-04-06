@@ -30,7 +30,7 @@ class Tour(db.Model):
     description = db.Column(db.String(1000))
     average_rating = db.Column(db.Float)
     estimated_completion_time = db.Column(db.Integer)
-    is_public = db.Column(db.Integer)
+    is_public = db.Column(db.Integer, nullable=False)
     reviews = db.relationship("Review", backref="tour")
     places = db.relationship(
         "Place",

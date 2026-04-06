@@ -240,6 +240,10 @@ table {
     width: 100%;
 }
 
+th {
+    font-style: bold;
+}
+
 th,td {
     text-align: left;
     padding: 8px;
@@ -411,22 +415,18 @@ gmp-map {
 
 #admin-tour-list,
 #edit-tour-places {
-  width: 50%;
-}
-
-#admin-tour-headers th,
-#edit-tour-headers th {
-  font-style: bold;
+    width: 50%;
 }
 
 #admin-tour-headers th,
 #edit-tour-headers th,
+#add-stop-button td,
 .admin-tour-items td,
 .admin-tour-items td a,
 .edit-tour-items td {
-  text-align: center;
+    text-align: center;
 }
 
 #delete-tour-button {
-  background-color: red;
+    background-color: red;
 }

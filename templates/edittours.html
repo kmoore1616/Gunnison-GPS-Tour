@@ -15,8 +15,8 @@
         {% for t in tours %}
             <tr class="admin-tour-items">
                 <td><a href="/editTour/{{t.id}}">{{ t.name }}</a></td>
-                <td>{{ t.estimated_completion_time }}</td>
-                <td>{{ t.average_rating }}</td>
+                <td>{{ t.estimated_completion_time }} Minutes</td>
+                <td>{{ t.average_rating }} Stars</td>
             </tr>
         {% endfor %}
     </table>
