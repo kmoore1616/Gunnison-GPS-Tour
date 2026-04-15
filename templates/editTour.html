@@ -29,9 +29,9 @@
                 {% for p in tour.places %}
                     <tr class="edit-tour-items">
                         <td>{{p.name}}</td>
-                        <td><button type="button" onclick="movePlaceUp()">Move Up</button></td>
-                        <td><button type="button" onclick="movePlaceDown()">Move Down</button></td>
-                        <td><button type="button" onclick="removeStop()">Remove Stop</button></td>
+                        <td><button class="{{p.id}}" type="button" onclick="movePlaceUp(this)">Move Up</button></td>
+                        <td><button class="{{p.id}}" type="button" onclick="movePlaceDown(this)">Move Down</button></td>
+                        <td><button class="{{p.id}}" type="button" onclick="removeStop(this)">Remove Stop</button></td>
                     </tr>
                 {% endfor %}
             </table>

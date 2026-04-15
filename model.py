@@ -65,6 +65,21 @@ class Admin(UserMixin, db.Model):
     password = db.Column(db.String(40), nullable=False)
 
 
+# MESSAGES DATABASE - FOR FRONT PAGE WELCOME MESSAGES
+class Welcome(db.Model):
+    __bind_key__ = 'messages'
+    id = db.Column(db.Integer, primary_key=True)
+    message = db.Column(db.String(10000), nullable=False, default="Welcome to the Gunnison GPS Walking Tours experience!")
+
+
+class Event(db.Model):
+    __bind_key__ = 'messages'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.String(10000), nullable=False)
+    is_public = db.Column(db.Integer, nullable=False)
+
+
 # INITIALIZE DATABASES
 def init_db(app):
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///gps-database.sqlite"
@@ -73,9 +88,13 @@ def init_db(app):
             "url": "sqlite:///admin.sqlite",
             "pool_recycle": 3600,
         },
+        "messages": {
+            "url": "sqlite:///messages.sqlite",
+            "pool_recycle": 3700,
+        },
     }
 
     db.init_app(app)
 
     with app.app_context():
-        db.create_all(bind_key=[None, "admin"])
+        db.create_all(bind_key=[None, "admin", "messages"])

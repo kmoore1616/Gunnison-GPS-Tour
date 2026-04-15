@@ -139,40 +139,40 @@ def register_routes(app):
     @app.route("/createTour")
     @login_required
     def createtour():
-        tour = Tour(name="New Tour ",
+        currtour = Tour(name="New Tour ",
                     description="A brand new tour!",
                     average_rating=0.0,
                     estimated_completion_time=0,
                     is_public=0
                     )
 
-        db.session.add(tour)
+        db.session.add(currtour)
         db.session.commit()
 
-        tour = Tour.query.filter_by(name="New Tour ").first()
-        tour.name = tour.name + str(tour.id)
+        currtour = Tour.query.filter_by(name="New Tour ").first()
+        currtour.name = currtour.name + str(currtour.id)
 
         db.session.commit()
 
         return render_template(
             "editTour.html",
-            tour=tour
+            tour=currtour
         )
 
     @app.route("/editTour/<tour_id>")
     @login_required
     def edittour(tour_id):
-        tour = Tour.query.filter_by(id=tour_id).first()
+        currtour = Tour.query.filter_by(id=tour_id).first()
         return render_template(
             "editTour.html",
-            tour=tour
+            tour=currtour
         )
 
     @app.route("/saveTour/<tour_id>", methods=['POST'])
     @login_required
     def savetour(tour_id):
         if request.method == 'POST':
-            tour = Tour.query.filter_by(id=tour_id).first()
+            currtour = Tour.query.filter_by(id=tour_id).first()
             name = request.form['name']
             description = request.form['description']
             try:
@@ -180,12 +180,12 @@ def register_routes(app):
             except BadRequestKeyError:
                 is_public = 0
 
-            if name != tour.name:
-                tour.name = name
-            if description != tour.description:
-                tour.description = description
-            if is_public != tour.is_public:
-                tour.is_public = is_public
+            if name != currtour.name:
+                currtour.name = name
+            if description != currtour.description:
+                currtour.description = description
+            if is_public != currtour.is_public:
+                currtour.is_public = is_public
 
             db.session.commit()
 
@@ -198,16 +198,17 @@ def register_routes(app):
         if request.method == 'POST':
             data = request.get_json(force=True)
             name = data['name']
-            tour = Tour.query.filter_by(name=name).first()
             operation = data['operation']
+            place_id = data['place_id']
+
+            currtour = Tour.query.filter_by(name=name).first()
+
+
             if operation == "move_up":
-                print(operation)
                 return json_response(result=0)
             elif operation == "move_down":
-                print(operation)
                 return json_response(result=0)
             elif operation == "delete":
-                print(operation)
                 return json_response(result=0)
 
     @app.route("/api/get_public", methods=['POST'])
@@ -217,8 +218,8 @@ def register_routes(app):
         if request.method == 'POST':
             data = request.get_json(force=True)
             name = data['name']
-            tour = Tour.query.filter_by(name=name).first()
-            return json_response(is_public=tour.is_public)
+            currtour = Tour.query.filter_by(name=name).first()
+            return json_response(is_public=currtour.is_public)
 
     @app.route("/api/delete_tour", methods=['POST'])
     @login_required
@@ -227,8 +228,8 @@ def register_routes(app):
         if request.method == 'POST':
             data = request.get_json(force=True)
             name = data['name']
-            tour = Tour.query.filter_by(name=name).first()
-            db.session.delete(tour)
+            currtour = Tour.query.filter_by(name=name).first()
+            db.session.delete(currtour)
             db.session.commit()
             return json_response(result=0)
 
