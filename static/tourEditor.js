@@ -1,4 +1,5 @@
 
+// Load page - Set status of the 'is_public' checkbox
 window.onload = function() {
     var name = document.getElementById('editTourName').innerHTML;
     var data = {name: name};
@@ -18,10 +19,12 @@ window.onload = function() {
     xhttp.send(JSON.stringify(data));
 }
 
-function movePlaceUp() {
+// Move place up in the order of the tour
+function movePlaceUp(button) {
     console.log("Move this place up!");
+    console.log(button.className);
     var name = document.getElementById('editTourName').innerHTML;
-    var data = {name: name, operation: "move_up"};
+    var data = {name: name, operation: "move_up", place_id: button.className};
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if(this.readyState === 4 && this.status === 200) {
@@ -35,10 +38,12 @@ function movePlaceUp() {
     xhttp.send(JSON.stringify(data));
 }
 
-function movePlaceDown() {
+// Move place down in the order of the tour
+function movePlaceDown(button) {
     console.log("Move this place down!");
+    console.log(button.className);
     var name = document.getElementById('editTourName').innerHTML;
-    var data = {name: name, operation: "move_down"};
+    var data = {name: name, operation: "move_down", place_id: button.className};
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if(this.readyState === 4 && this.status === 200) {
@@ -52,10 +57,12 @@ function movePlaceDown() {
     xhttp.send(JSON.stringify(data));
 }
 
-function removeStop() {
+// Remove stop from the tour
+function removeStop(button) {
     console.log("Remove this stop!")
+    console.log(button.className);
     var name = document.getElementById('editTourName').innerHTML;
-    var data = {name: name, operation: "delete"};
+    var data = {name: name, operation: "delete", place_id: button.className};
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if(this.readyState === 4 && this.status === 200) {
@@ -69,6 +76,7 @@ function removeStop() {
     xhttp.send(JSON.stringify(data));
 }
 
+// Delete the tour from the database
 function deleteTour() {
     var text = "Are you sure you want to permanently delete this tour?\nClick OK to continue with deletion.";
     if(confirm(text) == true) {
