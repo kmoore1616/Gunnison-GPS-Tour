@@ -302,3 +302,27 @@ def register_routes(app):
         db.session.commit()
         return '',204
 
+    @app.errorhandler(404)
+    def e404(err):
+
+        path = request.path
+        if path.startswith('/admin'):
+            return render_template('adminerror.html', err=404)
+        else:
+            return render_template('errorPage.html',err=404)
+
+    @app.errorhandler(401)
+    def unauthorized_handler(err):
+        path = request.path
+        if path.startswith('/admin'):
+            return render_template('adminerror.html', err=401)
+        else:
+            return render_template('errorPage.html', err=401)
+
+    @app.errorhandler(403)
+    def forbidden_handler(err):
+        path = request.path
+        if path.startswith('/admin'):
+            return render_template('adminerror.html', err=403)
+        else:
+            return render_template('errorPage.html', err=403)
