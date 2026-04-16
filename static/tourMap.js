@@ -8,6 +8,7 @@
 let coords;
 let globalMap;
 let route = [];
+let stops = [];
 let target;
 
 const mapElement = document.querySelector("gmp-map");
@@ -20,6 +21,51 @@ function getRandomColor() {
     return "#" + Math.floor(Math.random() * 16777215).toString(16);
 }
 
+function createStopInfoContent(stop) {
+    const content = document.createElement("div");
+
+    const name = document.createElement("h3");
+    name.textContent = stop.name;
+
+    const description = document.createElement("p");
+    description.textContent = stop.description;
+
+    content.appendChild(name);
+    content.appendChild(description);
+
+    return content;
+}
+
+function shouldShowStopInfo() {
+    const endTourButton = document.getElementById("endButton");
+    return endTourButton !== null;
+}
+
+function createStopMarker(map, AdvancedMarkerElement, stop, stopNumber, infoWindow) {
+    const isOnTour = shouldShowStopInfo();
+
+    const marker = new AdvancedMarkerElement({
+        map,
+        position: { lat: stop.lat, lng: stop.lng },
+        title: "Stop " + stopNumber,
+    });
+
+    if (isOnTour) {
+        marker.addListener("click", () => {
+            const content = createStopInfoContent(stop);
+
+            infoWindow.close();
+            infoWindow.setContent(content);
+            infoWindow.open({
+                anchor: marker,
+                map,
+            });
+        });
+    }
+
+    return marker;
+}
+
 // Draw the lines between each stop on the tour
 async function drawTourPolylines(map, tourId, AdvancedMarkerElement) {
     const res = await fetch(`/get_tour_poly/${tourId}`); // Get list of polylines
@@ -28,20 +74,24 @@ async function drawTourPolylines(map, tourId, AdvancedMarkerElement) {
     const data = await res.json();
 
     coords = data.segments;
+    stops = data.stops;
 
-    if (coords.length === 0) return;
+    if (stops.length === 0) return;
 
-    const firstSegment = coords[0];
-    const firstStop = firstSegment.origin;
+    const firstStop = stops[0];
     map.setCenter({ lat: firstStop.lat, lng: firstStop.lng });
 
     target = { lat: firstStop.lat, lng: firstStop.lng };
 
-    new AdvancedMarkerElement({
-        map,
-        position: { lat: firstStop.lat, lng: firstStop.lng },
-        title: "Stop 1",
-    });
+    const infoWindow = new google.maps.InfoWindow();
+
+    for (let i = 0; i < stops.length; i += 1) {
+        const stop = stops[i];
+        const stopNumber = i + 1;
+
+
+        createStopMarker(map, AdvancedMarkerElement, stop, stopNumber, infoWindow);
+    }
 
     for (let i = 0; i < coords.length; i += 1) {
         const segment = coords[i];
@@ -50,12 +100,6 @@ async function drawTourPolylines(map, tourId, AdvancedMarkerElement) {
         const longitude_dst = destination.lng;
 
         route.push([latitude_dst, longitude_dst]);
-
-        new AdvancedMarkerElement({
-            map,
-            position: { lat: latitude_dst, lng: longitude_dst},
-            title: "Stop " + (i + 2),
-        });
 
         const encoded = segment.polyline;
         if (!encoded) continue;
@@ -92,6 +136,7 @@ async function initMap() {
         coords: coords,
         map: globalMap,
         route: route,
+        stops: stops,
         target: target,
     };
 }

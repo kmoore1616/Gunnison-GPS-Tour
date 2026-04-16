@@ -16,8 +16,10 @@ let route = [];
 let userMarkers = [];
 let userRoutes = [];
 let testVar = 0;
-let iterator = 1;
+let i = 1;
 let current_stop = 0;
+let latestUserPosition;
+let recenterButton;
 
 const tour_id = document.getElementById("tour-id").value;
 
@@ -45,6 +47,7 @@ function setupTourButtons() {
     let skip_element = document.getElementById("skipButton")
     let
         end_element = document.getElementById("endButton")
+    recenterButton = document.getElementById("recenterButton")
 
     if (skip_element != null){
         skip_element.addEventListener("click", skipStop);
@@ -53,6 +56,31 @@ function setupTourButtons() {
     if (end_element != null){
         end_element.addEventListener("click", endTour);
     }
+
+    if (recenterButton != null){
+        recenterButton.addEventListener("click", recenterOnUser);
+    }
+}
+
+function showRecenterButton() {
+    if (recenterButton != null && latestUserPosition != null) {
+        recenterButton.hidden = false;
+    }
+}
+
+function hideRecenterButton() {
+    if (recenterButton != null) {
+        recenterButton.hidden = true;
+    }
+}
+
+function recenterOnUser() {
+    if (latestUserPosition == null) {
+        return;
+    }
+
+    globalMap.panTo(latestUserPosition);
+    hideRecenterButton();
 }
 
 // Draw the marker for the user's current location
@@ -65,7 +93,7 @@ async function drawUserPolyline(crd) {
     }
 
     const userPosition = { lat: crd.latitude, lng: crd.longitude };
-    globalMap.panTo(userPosition);
+    latestUserPosition = userPosition;
 
     // Create marker at user position
     const userMarker = new AdvancedMarkerElement({
@@ -128,11 +156,11 @@ async function success(pos) {
 
     if (target.lat === crd.latitude && target.lng === crd.longitude) {
         console.log("Congratulations, you reached the target");
-        const nextSegment = coords[iterator];
+        const nextSegment = coords[i];
         const nextDestination = nextSegment.destination;
         target = { lat: nextDestination.lat, lng: nextDestination.lng };
-        iterator = iterator + 1;
-        if (iterator == coords.length) {
+        i = i+1;
+        if (i == coords.length) {
             navigator.geolocation.clearWatch(id);
         }
     }
@@ -166,6 +194,7 @@ async function initTourNavigation() {
     target = tourMap.target;
 
     setupTourButtons();
+    globalMap.addListener("dragstart", showRecenterButton);
 
     // Live location tracking -> calls the success function on update
     id = navigator.geolocation.watchPosition(success, error, options);
