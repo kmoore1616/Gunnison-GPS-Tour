@@ -90,6 +90,26 @@ def get_ordered_places_for_tour(tour_id):
     return [place_by_id[place_id] for place_id in ordered_place_ids if place_id in place_by_id]
 
 
+def serialize_stop(place):
+    return {
+        "id": place.id,
+        "name": place.name,
+        "description": place.description,
+        "lat": float(place.latitude),
+        "lng": float(place.longitude),
+    }
+
+
+def serialize_stops(places):
+    stops = []
+
+    for place in places:
+        stop = serialize_stop(place)
+        stops.append(stop)
+
+    return stops
+
+
 def register_map_routes(app):
     @app.route("/get_tour_poly/<tour_id>", methods=["GET"])
     def get_tour_poly(tour_id):
@@ -98,10 +118,13 @@ def register_map_routes(app):
             return jsonify({"error": f"Tour {tour_id} not found"}), 404
 
         places = get_ordered_places_for_tour(tour_id)
+        stops = serialize_stops(places)
+
         if len(places) < 2:
             return jsonify(
                 {
                     "tourId": tour_id,
+                    "stops": stops,
                     "polylines": [],
                     "segments": [],
                     "message": "Need at least 2 places to create route segments",
@@ -117,8 +140,22 @@ def register_map_routes(app):
                 "lat": float(second_place.latitude),
                 "lng": float(second_place.longitude),
             }
+            polyline = compute_route(origin, destination)
 
-            segments.append((origin, destination))
-            polylines.append(compute_route(origin, destination))
+            segment = {
+                "origin": origin,
+                "destination": destination,
+                "polyline": polyline,
+            }
 
-        return jsonify({"tourId": tour_id, "polylines": polylines, "segments": segments})
+            segments.append(segment)
+            polylines.append(polyline)
+
+        return jsonify(
+            {
+                "tourId": tour_id,
+                "stops": stops,
+                "polylines": polylines,
+                "segments": segments,
+            }
+        )
