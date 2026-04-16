@@ -6,6 +6,7 @@ from werkzeug.exceptions import BadRequestKeyError
 
 from model import Admin, Tour, Feedback, db, Review, tour_places, Place
 from mail import send_feedback_email
+from map import get_ordered_places_for_tour
 
 
 def json_answer(text):
@@ -73,16 +74,8 @@ def register_routes(app):
             col.append([k.id,k.name,k.description])
         return render_template("places.html", col=col,feat_tours=feat_tours)
 
-    @app.route("/Tour")
-    def tour():
-        tour_list = 1
-        return render_template("onTour.html", tour_list=tour_list)
 
-    @app.route("/Contact")
-    def contact():
-        return render_template("contact.html")
-
-    @app.route("/feedback", methods=["GET", "POST"])
+    @app.route("/Contact", methods=["GET", "POST"])
     def feedback():
         if request.method == "POST":
             name = request.form['name']
@@ -108,7 +101,10 @@ def register_routes(app):
     def viewtour(tour_id):
         currtour = Tour.query.filter_by(id=tour_id).first()
 
-        places = db.session.query(Place).join(tour_places, tour_places.c.place_id == Place.id).filter(tour_places.c.tour_id == tour_id).all()
+        if currtour is None:
+            abort(404)
+
+        places = get_ordered_places_for_tour(tour_id)
 
         col = [(p.id, p.name, p.description)
                for p in places]
@@ -121,6 +117,21 @@ def register_routes(app):
             time=currtour.estimated_completion_time,
             col=col
         )
+
+
+    @app.route("/onTour/<tour_id>")
+    def onTour(tour_id):
+        currtour = Tour.query.filter_by(id=tour_id).first()
+
+        if currtour is None:
+            abort(404)
+
+        return render_template(
+            "onTour.html",
+            tour_id=tour_id,
+            tour=currtour.name,
+        )
+
 
     @app.route("/adminhome")
     @login_required
