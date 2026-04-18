@@ -4,43 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="/static/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     {% block head %}
     {% endblock %}
 </head>
 <body>
-    <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/Tours">Tours</a></li>
-            <li><a href="/Locations">Locations</a></li>
-            <li><a href="/Contact">Contact</a></li>
-            <li><a href="/feedback">Feedback</a></li>
-        </ul>
-    </nav>
 
-<div class="topnav">
-  <div class="title">Gunnison Tours</div>
+<!-- Header -->
+<header class="header">
+    <div class="topnav">
+        <div class="title">
+            <a class="navbar-brand" href="/">
+                <img src="/static/photos/chamber_logo_2026_v2.png" alt="chamber logo" style="width:25vh;"
+                     class="rounded-pill">
+            </a>
+        </div>
+        <button class="openbtn" onclick="openNav()">☰</button>
+    </div>
+</header>
+
+<!-- Pull out nav bar -->
 <div id="Sidebar" class="sidebar">
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-  <a href="/">Home</a>
-  <a href="/Tours">Tours</a>
-  <a href="/Locations">Locations</a>
-  <a href="/Contact">Contact</a>
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+    <a href="/">Home</a>
+    <a href="/Tours">Tours</a>
+    <a href="/Locations">Locations</a>
+    <a href="/Contact">Contact</a>
 </div>
-    <button class="openbtn" onclick="openNav()">☰</button>
-</div>
-<script src="/static/navbar.js"></script>
 
-<button class="navButton" onclick="openNav()">☰</button>
-    <footer>
-    <ul>
-        <li><a href="/">Back to Top</a></li>
-        <li><a href="/Tours">Tours</a></li>
-        <li><a href="/Locations">Locations</a></li>
-        <li><a href="/Contact">Contact</a></li>
-    </ul>
+{% block content %}
+{% endblock %}
+
+<!-- Navigation -->
+<footer class="footer-centered" role="contentinfo">
+    <div class="footer-centered__container">
+
+        <!-- Logo -->
+        <a href="#" class="footer-centered__logo" aria-label="Homepage">
+            <img src="/static/photos/chamber_logo_2026_v2.png" style="width:25vh;" class="rounded-pill">
+        </a>
+
+        <!-- Navigation -->
+        <nav class="footer-centered__nav" aria-label="Main Footer Navigation">
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/Tours">Tours</a></li>
+                <li><a href="/Locations">Locations</a></li>
+                <li><a href="/Contact">Contact</a></li>
+            </ul>
+        </nav>
+
+        <!-- Social Media -->
+        <nav class="footer-centered__social" aria-label="Social Media Links">
+            <ul>
+                <li>
+                    <a href="https://www.gunnisonchamber.com/" class="fa fa-google"></a>
+                </li>
+                <li>
+                    <a href="https://www.facebook.com/GunnisonChamberofCommerce/" class="fa fa-facebook"></a>
+                </li>
+            </ul>
+            <br>
+            <a href="tel:+970-641-1501">Call Us</a><br>
+            <a href="https://www.google.com/maps/place/Gunnison+Country+Chamber+Commerce+and+Gunnison+Visitor+Center/@38.5448542,-106.9257945,17z/data=!4m5!3m4!1s0x873f92ce34253de1:0xfad36c56910e082b!8m2!3d38.5445953!4d-106.9213448?shorturl=1">
+                500 E. Tomichi Ave, Gunnison, CO 81230</a>
+        </nav>
+
+    </div>
 </footer>
-    {% block content %}
-    {% endblock %}
+<script src="/static/navbar.js"></script>
+<script src="/static/header.js"></script>
 </body>
 </html>
