@@ -27,6 +27,7 @@ export function openPopup(tour_id) {
 export function closePopup() {
   const overlay = document.getElementById('popupOverlay');
   if (overlay) overlay.remove();
+  window.location.href = '/';
 }
 
 function remove(stars) {

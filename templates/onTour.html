@@ -1,6 +1,7 @@
-{% extends "base.html" %}
+{% extends "visitornav.html" %}
 {% block head %}
-    <style>
+<title>View Tour</title>
+<style>
     gmp-map {
         height: clamp(300px, 60vh, 700px);
         width: 100%;
@@ -12,16 +13,35 @@
             height: 50vh;
         }
     }
-    </style>
+</style>
 
-    <script type="module" src="{{ url_for('static', filename='map.js') }}"></script>
-    <!-- prettier-ignore -->
-    <script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
-        ({key: "AIzaSyA5NCmT4YZvoa5KVQcOF1XHN3B8PxNpapQ", v: "weekly"});</script>
+<!-- prettier-ignore -->
+<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+({key: "AIzaSyA5NCmT4YZvoa5KVQcOF1XHN3B8PxNpapQ", v: "weekly"});</script>
 
 {% endblock %}
-{% block body %}
-    <div hidden id="tour-id">{{ tour_id }}</div>
-    <gmp-map center="38.54260065425841, -106.91915044613187" zoom="18" map-id="DEMO_MAP_ID">
-    </gmp-map>
+{% block content %}
+
+<body id="view">
+<div id="tour-id" hidden >{{ tour_id }}</div>
+
+<!-- THIS NEEDS TO CENTER ON START! -->
+<div style="position: relative; width: 100%;">
+<gmp-map center="38.54260065425841, -106.91915044613187" zoom="18" map-id="DEMO_MAP_ID">
+</gmp-map>
+    <div style="position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; justify-content: center; padding: 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.94); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22); max-width: calc(100% - 24px); flex-wrap: wrap;">
+        <button type="button" id="recenterButton" hidden style="border: 0; border-radius: 6px; background: #1A73E8; color: white; font: inherit; font-weight: 700; padding: 10px 14px; cursor: pointer; box-shadow: 0 2px 5px rgba(26, 115, 232, 0.28);">Re-center</button>
+        <button type="button" id="skipButton" style="border: 1px solid #D2D7DF; border-radius: 6px; background: #FFFFFF; color: #253044; font: inherit; font-weight: 700; padding: 10px 14px; cursor: pointer;">Skip Stop</button>
+        <button type="button" id="endButton" style="border: 0; border-radius: 6px; background: #B3261E; color: white; font: inherit; font-weight: 700; padding: 10px 14px; cursor: pointer; box-shadow: 0 2px 5px rgba(179, 38, 30, 0.24);">End Tour</button>
+    </div>
+</div>
+</body>
+
+<script type="module" src="../static/tourNavigation.js"></script>
+<!-- prettier-ignore -->
+<script>(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})
+({key: "AIzaSyA5NCmT4YZvoa5KVQcOF1XHN3B8PxNpapQ", v: "weekly"});</script>
+
+<input type="hidden" id="tour_id" name="tour_id" value="{{ tour_id }}">
+
 {% endblock %}

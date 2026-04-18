@@ -6,6 +6,7 @@ from werkzeug.exceptions import BadRequestKeyError
 
 from model import Admin, Tour, Feedback, db, Review, tour_places, Place
 from mail import send_feedback_email
+from map import get_ordered_places_for_tour
 
 
 def json_answer(text):
@@ -73,16 +74,8 @@ def register_routes(app):
             col.append([k.id,k.name,k.description])
         return render_template("places.html", col=col,feat_tours=feat_tours)
 
-    @app.route("/Tour")
-    def tour():
-        tour_list = 1
-        return render_template("onTour.html", tour_list=tour_list)
 
-    @app.route("/Contact")
-    def contact():
-        return render_template("contact.html")
-
-    @app.route("/feedback", methods=["GET", "POST"])
+    @app.route("/Contact", methods=["GET", "POST"])
     def feedback():
         if request.method == "POST":
             name = request.form['name']
@@ -108,7 +101,10 @@ def register_routes(app):
     def viewtour(tour_id):
         currtour = Tour.query.filter_by(id=tour_id).first()
 
-        places = db.session.query(Place).join(tour_places, tour_places.c.place_id == Place.id).filter(tour_places.c.tour_id == tour_id).all()
+        if currtour is None:
+            abort(404)
+
+        places = get_ordered_places_for_tour(tour_id)
 
         col = [(p.id, p.name, p.description)
                for p in places]
@@ -121,6 +117,21 @@ def register_routes(app):
             time=currtour.estimated_completion_time,
             col=col
         )
+
+
+    @app.route("/onTour/<tour_id>")
+    def onTour(tour_id):
+        currtour = Tour.query.filter_by(id=tour_id).first()
+
+        if currtour is None:
+            abort(404)
+
+        return render_template(
+            "onTour.html",
+            tour_id=tour_id,
+            tour=currtour.name,
+        )
+
 
     @app.route("/adminhome")
     @login_required
@@ -139,40 +150,40 @@ def register_routes(app):
     @app.route("/createTour")
     @login_required
     def createtour():
-        tour = Tour(name="New Tour ",
+        currtour = Tour(name="New Tour ",
                     description="A brand new tour!",
                     average_rating=0.0,
                     estimated_completion_time=0,
                     is_public=0
                     )
 
-        db.session.add(tour)
+        db.session.add(currtour)
         db.session.commit()
 
-        tour = Tour.query.filter_by(name="New Tour ").first()
-        tour.name = tour.name + str(tour.id)
+        currtour = Tour.query.filter_by(name="New Tour ").first()
+        currtour.name = currtour.name + str(currtour.id)
 
         db.session.commit()
 
         return render_template(
             "editTour.html",
-            tour=tour
+            tour=currtour
         )
 
     @app.route("/editTour/<tour_id>")
     @login_required
     def edittour(tour_id):
-        tour = Tour.query.filter_by(id=tour_id).first()
+        currtour = Tour.query.filter_by(id=tour_id).first()
         return render_template(
             "editTour.html",
-            tour=tour
+            tour=currtour
         )
 
     @app.route("/saveTour/<tour_id>", methods=['POST'])
     @login_required
     def savetour(tour_id):
         if request.method == 'POST':
-            tour = Tour.query.filter_by(id=tour_id).first()
+            currtour = Tour.query.filter_by(id=tour_id).first()
             name = request.form['name']
             description = request.form['description']
             try:
@@ -180,12 +191,12 @@ def register_routes(app):
             except BadRequestKeyError:
                 is_public = 0
 
-            if name != tour.name:
-                tour.name = name
-            if description != tour.description:
-                tour.description = description
-            if is_public != tour.is_public:
-                tour.is_public = is_public
+            if name != currtour.name:
+                currtour.name = name
+            if description != currtour.description:
+                currtour.description = description
+            if is_public != currtour.is_public:
+                currtour.is_public = is_public
 
             db.session.commit()
 
@@ -198,16 +209,17 @@ def register_routes(app):
         if request.method == 'POST':
             data = request.get_json(force=True)
             name = data['name']
-            tour = Tour.query.filter_by(name=name).first()
             operation = data['operation']
+            place_id = data['place_id']
+
+            currtour = Tour.query.filter_by(name=name).first()
+
+
             if operation == "move_up":
-                print(operation)
                 return json_response(result=0)
             elif operation == "move_down":
-                print(operation)
                 return json_response(result=0)
             elif operation == "delete":
-                print(operation)
                 return json_response(result=0)
 
     @app.route("/api/get_public", methods=['POST'])
@@ -217,8 +229,8 @@ def register_routes(app):
         if request.method == 'POST':
             data = request.get_json(force=True)
             name = data['name']
-            tour = Tour.query.filter_by(name=name).first()
-            return json_response(is_public=tour.is_public)
+            currtour = Tour.query.filter_by(name=name).first()
+            return json_response(is_public=currtour.is_public)
 
     @app.route("/api/delete_tour", methods=['POST'])
     @login_required
@@ -227,8 +239,8 @@ def register_routes(app):
         if request.method == 'POST':
             data = request.get_json(force=True)
             name = data['name']
-            tour = Tour.query.filter_by(name=name).first()
-            db.session.delete(tour)
+            currtour = Tour.query.filter_by(name=name).first()
+            db.session.delete(currtour)
             db.session.commit()
             return json_response(result=0)
 
@@ -302,3 +314,27 @@ def register_routes(app):
         db.session.commit()
         return '',204
 
+    @app.errorhandler(404)
+    def e404(err):
+
+        path = request.path
+        if path.startswith('/admin'):
+            return render_template('adminerror.html', err=404)
+        else:
+            return render_template('errorPage.html',err=404)
+
+    @app.errorhandler(401)
+    def unauthorized_handler(err):
+        path = request.path
+        if path.startswith('/admin'):
+            return render_template('adminerror.html', err=401)
+        else:
+            return render_template('errorPage.html', err=401)
+
+    @app.errorhandler(403)
+    def forbidden_handler(err):
+        path = request.path
+        if path.startswith('/admin'):
+            return render_template('adminerror.html', err=403)
+        else:
+            return render_template('errorPage.html', err=403)
