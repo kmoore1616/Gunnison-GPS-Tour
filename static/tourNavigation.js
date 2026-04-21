@@ -22,8 +22,7 @@ let latestUserPosition;
 let recenterButton;
 let imHereButton;
 
-const tour_id = document.getElementById("tour-id").value;
-const arrivalRadiusMeters = 30;
+const tour_id = document.getElementById("tour-id").textContent.trim();
 
 const options = {
     enableHighAccuracy: false,
@@ -65,7 +64,7 @@ function setupTourButtons() {
     }
 
     if (imHereButton != null){
-        imHereButton.addEventListener("click", showCurrentStopDescription);
+        imHereButton.addEventListener("click", openCurrentStopPopup);
     }
 }
 
@@ -90,104 +89,41 @@ function recenterOnUser() {
     hideRecenterButton();
 }
 
-function showImHereButton() {
-    if (imHereButton != null) {
-        imHereButton.hidden = false;
+function closeStopPopup() {
+    const overlay = document.getElementById("stopPopupOverlay");
+
+    if (overlay) {
+        overlay.remove();
     }
 }
 
-function hideImHereButton() {
-    if (imHereButton != null) {
-        imHereButton.hidden = true;
-    }
-}
+function openCurrentStopPopup() {
+    const stop = stops[currentStopIndex];
 
-function getDistanceToTargetInMeters(userPosition) {
-    const userLatLng = new google.maps.LatLng(userPosition.lat, userPosition.lng);
-    const targetLatLng = new google.maps.LatLng(target.lat, target.lng);
-
-    return google.maps.geometry.spherical.computeDistanceBetween(userLatLng, targetLatLng);
-}
-
-function updateArrivalButton(userPosition) {
-    const distanceToTarget = getDistanceToTargetInMeters(userPosition);
-
-    if (distanceToTarget <= arrivalRadiusMeters) {
-        showImHereButton();
-    } else {
-        hideImHereButton();
-    }
-}
-
-function removeStopDescriptionPopup() {
-    const popup = document.getElementById("stopDescriptionPopup");
-
-    if (popup != null) {
-        popup.remove();
-    }
-}
-
-function showStopDescriptionPopup(stop) {
-    removeStopDescriptionPopup();
-
-    const overlay = document.createElement("div");
-    overlay.id = "stopDescriptionPopup";
-    overlay.style.position = "fixed";
-    overlay.style.inset = "0";
-    overlay.style.zIndex = "1000";
-    overlay.style.display = "flex";
-    overlay.style.alignItems = "center";
-    overlay.style.justifyContent = "center";
-    overlay.style.padding = "18px";
-    overlay.style.background = "rgba(0, 0, 0, 0.42)";
-
-    const box = document.createElement("div");
-    box.style.width = "min(420px, 100%)";
-    box.style.borderRadius = "8px";
-    box.style.background = "white";
-    box.style.boxShadow = "0 12px 30px rgba(0, 0, 0, 0.28)";
-    box.style.padding = "22px";
-
-    const title = document.createElement("h2");
-    title.textContent = stop.name;
-    title.style.margin = "0 0 10px";
-    title.style.fontSize = "1.35rem";
-
-    const description = document.createElement("p");
-    description.textContent = stop.description;
-    description.style.margin = "0 0 18px";
-    description.style.lineHeight = "1.45";
-
-    const continueButton = document.createElement("button");
-    continueButton.type = "button";
-    continueButton.textContent = "Continue";
-    continueButton.style.border = "0";
-    continueButton.style.borderRadius = "6px";
-    continueButton.style.background = "#188038";
-    continueButton.style.color = "white";
-    continueButton.style.font = "inherit";
-    continueButton.style.fontWeight = "700";
-    continueButton.style.padding = "10px 14px";
-    continueButton.style.cursor = "pointer";
-    continueButton.addEventListener("click", () => {
-        removeStopDescriptionPopup();
-        advanceToNextStop();
-    });
-
-    box.appendChild(title);
-    box.appendChild(description);
-    box.appendChild(continueButton);
-    overlay.appendChild(box);
-    document.body.appendChild(overlay);
-}
-
-function showCurrentStopDescription() {
-    if (stops[currentStopIndex] == null) {
+    if (stop == null || document.getElementById("stopPopupOverlay")) {
         return;
     }
 
-    hideImHereButton();
-    showStopDescriptionPopup(stops[currentStopIndex]);
+    const params = new URLSearchParams();
+    params.set("name", stop.name);
+    params.set("description", stop.description);
+
+    fetch(`/stop-popup?${params.toString()}`)
+        .then(response => response.text())
+        .then(html => {
+            const temp = document.createElement("div");
+            temp.innerHTML = html;
+
+            const overlay = temp.querySelector("#stopPopupOverlay");
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add("show"));
+
+            document.getElementById("closeStopPopup").addEventListener("click", closeStopPopup);
+            document.getElementById("continueStopPopup").addEventListener("click", () => {
+                closeStopPopup();
+                advanceToNextStop();
+            });
+        });
 }
 
 function setTargetToStop(stopIndex) {
@@ -204,12 +140,11 @@ function routeUserToCurrentTarget() {
 }
 
 function advanceToNextStop() {
-    hideImHereButton();
     hideCompletedTourParts(currentStopIndex);
 
     if (currentStopIndex >= stops.length - 1) {
         navigator.geolocation.clearWatch(id);
-        endTour(tour_id);
+        endTour();
         return false;
     }
 
@@ -231,7 +166,6 @@ async function drawUserPolyline(crd) {
 
     const userPosition = { lat: crd.latitude, lng: crd.longitude };
     latestUserPosition = userPosition;
-    updateArrivalButton(userPosition);
 
     // Create marker at user position
     const userMarker = new AdvancedMarkerElement({
@@ -302,7 +236,7 @@ function error(err) {
     console.error(`ERROR(${err.code}): ${err.message}`);
 }
 
-export function endTour(tour_id) {
+export function endTour() {
     openPopup(tour_id);
 
 }

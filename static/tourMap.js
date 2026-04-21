@@ -138,6 +138,7 @@ async function drawTourPolylines(map, tourId, AdvancedMarkerElement, PinElement)
     target = { lat: firstStop.lat, lng: firstStop.lng };
 
     const infoWindow = new google.maps.InfoWindow();
+    const isOnTour = shouldShowStopInfo();
     stopMarkerPinElement = PinElement;
 
     for (let i = 0; i < stops.length; i += 1) {
@@ -155,6 +156,10 @@ async function drawTourPolylines(map, tourId, AdvancedMarkerElement, PinElement)
         const longitude_dst = destination.lng;
 
         route.push([latitude_dst, longitude_dst]);
+
+        if (isOnTour) {
+            continue;
+        }
 
         const encoded = segment.polyline;
         if (!encoded) continue;
