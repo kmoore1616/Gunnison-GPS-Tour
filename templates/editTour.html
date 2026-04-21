@@ -1,8 +1,8 @@
 {% extends "adminnav.html" %}
 {% block title %} Tours {% endblock %}
 {% block content %}
+<script src="/static/tourEditor.js"></script>
 <body id="tourEditor">
-    <script src="/static/tourEditor.js"></script>
     <h1 id="editTourName">{{ tour.name }}</h1>
     <h3>Tour Rating: {{ tour.average_rating }} Stars</h3>
     <h3>Estimated Length: {{ tour.estimated_completion_time }} Minutes</h3>
@@ -24,7 +24,7 @@
                     <th colspan="4">Tour Stops</th>
                 </tr>
                 <tr id="add-stop-button">
-                    <td colspan="4">Add Stop</td>
+                    <td colspan="4"><button type="button" onclick="addStop('{{tour.name}}')">Add Stop</button></td>
                 </tr>
                 {% for p in tour.places %}
                     <tr class="edit-tour-items">

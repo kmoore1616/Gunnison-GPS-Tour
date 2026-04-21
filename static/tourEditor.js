@@ -2,21 +2,71 @@
 // Load page - Set status of the 'is_public' checkbox
 window.onload = function() {
     var name = document.getElementById('editTourName').innerHTML;
-    var data = {name: name};
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if(this.readyState === 4 && this.status === 200) {
-            var json = JSON.parse(this.responseText);
-            var is_public = json.is_public;
-            if(is_public == 0) {
-                document.getElementById('is_public').checked = false;
-            } else {
-                document.getElementById('is_public').checked = true;
+    if(name) {
+        var data = {name: name};
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if(this.readyState === 4 && this.status === 200) {
+                var json = JSON.parse(this.responseText);
+                var is_public = json.is_public;
+                if(is_public == 0) {
+                    document.getElementById('is_public').checked = false;
+                } else {
+                    document.getElementById('is_public').checked = true;
+                }
             }
-        }
-    };
-    xhttp.open('POST', '/api/get_public', true);
-    xhttp.send(JSON.stringify(data));
+        };
+        xhttp.open('POST', '/api/get_public', true);
+        xhttp.send(JSON.stringify(data));
+    }
+}
+
+// Add new stop to the tour
+function addStop(name) {
+    console.log("Add stop!");
+    if (document.getElementById('new_stop_popup')){
+        return;
+    }
+
+    fetch(`/addStop?name=${name}`)
+        .then(response => response.text())
+        .then(html => {
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+
+            const overlay = temp.querySelector('#new_stop_popup');
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('show'));
+
+            document.getElementById('cancelNewPopup').addEventListener('click', closePopup);
+
+            console.log("Loading places on tour");
+            var data = {name: name};
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if(this.readyState === 4 && this.status === 200) {
+                    var json = JSON.parse(this.responseText);
+                    var places = json.places;
+                    var selector = document.getElementById('location_dropdown');
+                    for(p in places) {
+                        var option = document.createElement('option');
+                        option.value = places[p];
+                        option.innerHTML = places[p];
+                        selector.appendChild(option);
+                    }
+                }
+            };
+            xhttp.open('POST', '/api/get_places_on_tour', true);
+            xhttp.send(JSON.stringify(data));
+        });
+
+
+
+}
+
+function closePopup() {
+    const overlay = document.getElementById('new_stop_popup');
+    if (overlay) overlay.remove();
 }
 
 // Move place up in the order of the tour

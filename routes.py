@@ -159,7 +159,10 @@ def register_routes(app):
             place_id = data['place_id']
 
             currtour = Tour.query.filter_by(name=name).first()
-
+            query = tour_places.select().where(tour_places.c.tour_id == currtour.id)
+            result = db.session.execute(query)
+            for row in result: # prints the next_stop_place_id for each stop in currtour
+                print(row[2])
 
             if operation == "move_up":
                 return json_response(result=0)
@@ -168,8 +171,80 @@ def register_routes(app):
             elif operation == "delete":
                 return json_response(result=0)
 
-    @app.route("/api/get_public", methods=['POST'])
+    @app.route("/addStop")
     @login_required
+    def add_stop():
+        name = request.args.get('name')
+        return render_template("newStopPopup.html", name=name)
+
+    @app.route("/api/addPlaceToTour", methods=['POST'])
+    @login_required
+    def add_stop_to_tour():
+        if request.method == 'POST':
+            search_name = request.form['searchName']
+            existing_location = request.form['existingLocation']
+            name = request.form['name']
+            address = request.form['address']
+            description = request.form['description']
+
+            # Get this tour
+            currtour_name = request.form['tour_name']
+            currtour = Tour.query.filter_by(name=currtour_name).first()
+
+            # Find places that are part of this tour
+            query = tour_places.select().where(tour_places.c.tour_id == currtour.id)
+            result = db.session.execute(query)
+            place_ids = []
+            for row in result:
+                place_ids.append(row[1])
+            currplaces = []
+            for i in place_ids:
+                placeI = Place.query.filter_by(id=i).first()
+                currplaces.append(placeI)
+
+            # Error check user's input
+            if search_name != "":
+                print(search_name)
+            elif existing_location != "none":
+                this_place = Place.query.filter_by(name=existing_location).first()
+                query = tour_places.select().where(tour_places.c.tour_id == currtour.id)
+                result = db.session.execute(query)
+                rows = result.all()
+                count = len(rows)
+
+                if count > 0:
+                    previous_place = result[count-1]
+                currtour.places.append(this_place) # no error, but nothing happens
+                if count > 0:
+                    previous_place[2] = this_place.id
+            elif name != "":
+                if address != "":
+                    if description != "":
+                        new_place = Place(name=name, description=description) # convert address to coordinates
+                    else:
+                        print("Description must be provided")
+                else:
+                    print("Address must be provided")
+            else:
+                print("Not enough information for new stop")
+
+            return redirect('/editTour/' + str(currtour.id))
+
+    @app.route("/api/get_places_on_tour", methods=['POST'])
+    @as_json
+    def get_places():
+        if request.method == 'POST':
+            data = request.get_json(force=True)
+            name = data['name']
+            currtour = Tour.query.filter_by(name=name).first()
+            currplaces = []
+            all_places = Place.query.all()
+            for p in all_places:
+                if p not in currtour.places:
+                    currplaces.append(p.name)
+            return json_response(places=currplaces)
+
+    @app.route("/api/get_public", methods=['POST'])
     @as_json
     def get_public():
         if request.method == 'POST':
