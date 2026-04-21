@@ -6,7 +6,7 @@
  */
 
 import {openPopup} from './popup.js'
-import {mapElement, tourMapReady} from './tourMap.js'
+import {hideCompletedTourParts, mapElement, tourMapReady, updateNextStopMarker} from './tourMap.js'
 
 let id;
 let target;
@@ -97,6 +97,8 @@ function routeUserToCurrentTarget() {
 }
 
 function advanceToNextStop() {
+    hideCompletedTourParts(currentStopIndex);
+
     if (currentStopIndex >= stops.length - 1) {
         navigator.geolocation.clearWatch(id);
         endTour(tour_id);
@@ -105,6 +107,7 @@ function advanceToNextStop() {
 
     currentStopIndex = currentStopIndex + 1;
     setTargetToStop(currentStopIndex);
+    updateNextStopMarker(currentStopIndex);
     routeUserToCurrentTarget();
     return true;
 }
@@ -217,6 +220,7 @@ async function initTourNavigation() {
     }
 
     setTargetToStop(currentStopIndex);
+    updateNextStopMarker(currentStopIndex);
 
     setupTourButtons();
     globalMap.addListener("dragstart", showRecenterButton);

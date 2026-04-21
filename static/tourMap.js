@@ -9,6 +9,9 @@ let coords;
 let globalMap;
 let route = [];
 let stops = [];
+let stopMarkers = [];
+let segmentPolylines = [];
+let stopMarkerPinElement;
 let target;
 
 const mapElement = document.querySelector("gmp-map");
@@ -41,16 +44,67 @@ function shouldShowStopInfo() {
     return endTourButton !== null;
 }
 
-function createStopMarker(map, AdvancedMarkerElement, stop, stopNumber, infoWindow) {
+function getStopMarkerColor(isNextStop) {
+    if (isNextStop) {
+        return "#D4A017";
+    }
+
+    return "#8A8F98";
+}
+
+function createStopMarkerContent(PinElement, isNextStop) {
+    const pin = new PinElement({
+        background: getStopMarkerColor(isNextStop),
+        borderColor: "white",
+        glyphColor: "white",
+    });
+
+    return pin.element;
+}
+
+function updateNextStopMarker(nextStopIndex) {
+    for (let i = 0; i < stopMarkers.length; i += 1) {
+        const marker = stopMarkers[i];
+        const isNextStop = i === nextStopIndex;
+
+        marker.content = createStopMarkerContent(stopMarkerPinElement, isNextStop);
+    }
+}
+
+function hideCompletedTourParts(completedStopIndex) {
+    const marker = stopMarkers[completedStopIndex];
+
+    if (marker) {
+        marker.map = null;
+    }
+
+    const segmentPolyline = segmentPolylines[completedStopIndex];
+
+    if (segmentPolyline) {
+        segmentPolyline.setMap(null);
+    }
+}
+
+function createStopMarker(map, AdvancedMarkerElement, PinElement, stop, stopNumber, infoWindow) {
     const isOnTour = shouldShowStopInfo();
+    let markerContent;
+
+    if (isOnTour) {
+        const stopIndex = stopNumber - 1;
+        const isNextStop = stopIndex === 0;
+        markerContent = createStopMarkerContent(PinElement, isNextStop);
+    }
 
     const marker = new AdvancedMarkerElement({
         map,
         position: { lat: stop.lat, lng: stop.lng },
         title: "Stop " + stopNumber,
+        content: markerContent,
     });
 
     if (isOnTour) {
+        stopMarkers.push(marker);
+
         marker.addListener("click", () => {
             const content = createStopInfoContent(stop);
 
@@ -67,7 +121,7 @@ function createStopMarker(map, AdvancedMarkerElement, stop, stopNumber, infoWind
 }
 
 // Draw the lines between each stop on the tour
-async function drawTourPolylines(map, tourId, AdvancedMarkerElement) {
+async function drawTourPolylines(map, tourId, AdvancedMarkerElement, PinElement) {
     const res = await fetch(`/get_tour_poly/${tourId}`); // Get list of polylines
     if (!res.ok) throw new Error(await res.text());
 
@@ -84,13 +138,14 @@ async function drawTourPolylines(map, tourId, AdvancedMarkerElement) {
     target = { lat: firstStop.lat, lng: firstStop.lng };
 
     const infoWindow = new google.maps.InfoWindow();
+    stopMarkerPinElement = PinElement;
 
     for (let i = 0; i < stops.length; i += 1) {
         const stop = stops[i];
         const stopNumber = i + 1;
 
 
-        createStopMarker(map, AdvancedMarkerElement, stop, stopNumber, infoWindow);
+        createStopMarker(map, AdvancedMarkerElement, PinElement, stop, stopNumber, infoWindow);
     }
 
     for (let i = 0; i < coords.length; i += 1) {
@@ -108,12 +163,14 @@ async function drawTourPolylines(map, tourId, AdvancedMarkerElement) {
         console.log(randomColor);
 
         const path = google.maps.geometry.encoding.decodePath(encoded);
-        new google.maps.Polyline({
+        const segmentPolyline = new google.maps.Polyline({
             path,
             map,
             strokeColor: randomColor,
             strokeWeight: 5
         });
+
+        segmentPolylines.push(segmentPolyline);
     }
 }
 
@@ -122,7 +179,7 @@ async function initMap() {
     // Load libraries once, the right way
     await google.maps.importLibrary("maps");
     await google.maps.importLibrary("geometry"); // needed for decodePath
-    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
     const map = mapElement.innerMap;
     globalMap = map;
@@ -130,7 +187,7 @@ async function initMap() {
     map.setOptions({ mapTypeControl: false });
 
     const tourId = getTourId();
-    await drawTourPolylines(map, tourId, AdvancedMarkerElement);
+    await drawTourPolylines(map, tourId, AdvancedMarkerElement, PinElement);
 
     return {
         coords: coords,
@@ -145,5 +202,7 @@ const tourMapReady = initMap();
 
 export {
     mapElement,
+    hideCompletedTourParts,
     tourMapReady,
+    updateNextStopMarker,
 };
