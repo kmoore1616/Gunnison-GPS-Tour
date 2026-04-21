@@ -57,7 +57,7 @@ def get_ordered_places_for_tour(tour_id):
     link_rows = db.session.execute(
         text(
             """
-            SELECT place_id, next_stop_place_id
+            SELECT place_id, next_stop_place_id, start
             FROM tour_places
             WHERE tour_id = :tour_id
             """
@@ -68,12 +68,36 @@ def get_ordered_places_for_tour(tour_id):
     if not link_rows:
         return []
 
-    next_by_place = {row[0]: row[1] for row in link_rows}
-    place_ids = set(next_by_place.keys())
-    referenced_ids = {next_id for next_id in next_by_place.values() if next_id is not None}
-    head_candidates = sorted(place_ids - referenced_ids)
+    next_by_place = {}
+    place_ids = set()
+    start_place_id = None
 
-    current = head_candidates[0] if head_candidates else min(place_ids)
+    for row in link_rows:
+        place_id = row[0]
+        next_stop_place_id = row[1]
+        is_start = row[2]
+
+        next_by_place[place_id] = next_stop_place_id
+        place_ids.add(place_id)
+
+        if is_start:
+            start_place_id = place_id
+
+    if start_place_id is None:
+        referenced_ids = set()
+
+        for next_stop_place_id in next_by_place.values():
+            if next_stop_place_id is not None:
+                referenced_ids.add(next_stop_place_id)
+
+        head_candidates = sorted(place_ids - referenced_ids)
+
+        if head_candidates:
+            start_place_id = head_candidates[0]
+        else:
+            start_place_id = min(place_ids)
+
+    current = start_place_id
     ordered_place_ids = []
     visited = set()
 
@@ -82,12 +106,19 @@ def get_ordered_places_for_tour(tour_id):
         visited.add(current)
         current = next_by_place[current]
 
-    remaining = sorted(place_ids - visited)
-    ordered_place_ids.extend(remaining)
-
     place_rows = Place.query.filter(Place.id.in_(ordered_place_ids)).all()
-    place_by_id = {place.id: place for place in place_rows}
-    return [place_by_id[place_id] for place_id in ordered_place_ids if place_id in place_by_id]
+    place_by_id = {}
+
+    for place in place_rows:
+        place_by_id[place.id] = place
+
+    ordered_places = []
+
+    for place_id in ordered_place_ids:
+        if place_id in place_by_id:
+            ordered_places.append(place_by_id[place_id])
+
+    return ordered_places
 
 
 def serialize_stop(place):

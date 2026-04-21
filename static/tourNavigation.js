@@ -13,11 +13,11 @@ let target;
 let coords;
 let globalMap;
 let route = [];
+let stops = [];
 let userMarkers = [];
 let userRoutes = [];
 let testVar = 0;
-let i = 1;
-let current_stop = 0;
+let currentStopIndex = 0;
 let latestUserPosition;
 let recenterButton;
 
@@ -81,6 +81,32 @@ function recenterOnUser() {
 
     globalMap.panTo(latestUserPosition);
     hideRecenterButton();
+}
+
+function setTargetToStop(stopIndex) {
+    const stop = stops[stopIndex];
+    target = { lat: stop.lat, lng: stop.lng };
+}
+
+function routeUserToCurrentTarget() {
+    if (latestUserPosition == null) {
+        return;
+    }
+
+    createRoute(latestUserPosition.lat, latestUserPosition.lng);
+}
+
+function advanceToNextStop() {
+    if (currentStopIndex >= stops.length - 1) {
+        navigator.geolocation.clearWatch(id);
+        endTour(tour_id);
+        return false;
+    }
+
+    currentStopIndex = currentStopIndex + 1;
+    setTargetToStop(currentStopIndex);
+    routeUserToCurrentTarget();
+    return true;
 }
 
 // Draw the marker for the user's current location
@@ -156,13 +182,7 @@ async function success(pos) {
 
     if (target.lat === crd.latitude && target.lng === crd.longitude) {
         console.log("Congratulations, you reached the target");
-        const nextSegment = coords[i];
-        const nextDestination = nextSegment.destination;
-        target = { lat: nextDestination.lat, lng: nextDestination.lng };
-        i = i+1;
-        if (i == coords.length) {
-            navigator.geolocation.clearWatch(id);
-        }
+        advanceToNextStop();
     }
 }
 
@@ -176,12 +196,10 @@ export function endTour(tour_id) {
 }
 
 export function skipStop() {
-    current_stop++;
-    if(current_stop > route.length - 1) {
-       endTour()
-    }else {
-        let latlng = {lat: route[current_stop][0], lng: route[current_stop][1]};
-        globalMap.panTo(latlng);
+    const advanced = advanceToNextStop();
+
+    if (advanced) {
+        globalMap.panTo(target);
     }
 }
 
@@ -191,7 +209,14 @@ async function initTourNavigation() {
     coords = tourMap.coords;
     globalMap = tourMap.map;
     route = tourMap.route;
+    stops = tourMap.stops;
     target = tourMap.target;
+
+    if (stops.length === 0) {
+        return;
+    }
+
+    setTargetToStop(currentStopIndex);
 
     setupTourButtons();
     globalMap.addListener("dragstart", showRecenterButton);

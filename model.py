@@ -10,6 +10,7 @@ tour_places = db.Table(
     db.Column("tour_id", db.Integer, db.ForeignKey("tour.id"), primary_key=True),
     db.Column("place_id", db.Integer, db.ForeignKey("place.id"), primary_key=True),
     db.Column("next_stop_place_id", db.Integer, db.ForeignKey("place.id"), nullable=True),
+    db.Column("start", db.Boolean, default=False),
 )
 
 
