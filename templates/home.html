@@ -1,10 +1,16 @@
 {% extends "visitornav.html" %}
 {% block content %}
 <h1> Welcome! </h1>
-<p>Welcome to the Gunnison GPS Walking Tours experience!
-Discover the history, culture, and hidden gems of downtown Gunnison through interactive, self-guided tours.
-Use your phone to follow curated routes, learn about local landmarks, and explore at your own pace.
-Start your adventure and experience Gunnison like never before.</p>
+<p>
+    {% if welcome %}
+        {{ welcome.message }}
+    {% else %}
+        Welcome to the Gunnison GPS Walking Tours experience!
+        Discover the history, culture, and hidden gems of downtown Gunnison through interactive, self-guided tours.
+        Use your phone to follow curated routes, learn about local landmarks, and explore at your own pace.
+        Start your adventure and experience Gunnison like never before.
+    {% endif %}
+</p>
 
 <div class="homeContainer">
     <div class="homePageNav"><a href="/Tours">Tours</a></div><br>
@@ -12,11 +18,23 @@ Start your adventure and experience Gunnison like never before.</p>
     <div class="homePageNav"><a href="/Contact">Get in Touch</a></div>
 </div>
 
-<h1>Additional Info</h1>
-<p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-    cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-</p>
+<h1>Upcoming Events</h1>
+
+{% if event %}
+ <!--Event Name -->
+  <table>
+    {% for i in event %}
+    <tr>
+      <td>{{ i.title }}</td>
+    </tr>
+    <tr>
+         <!--Event Description -->
+        <td>{{ i.message }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+{% else %}
+    There are no upcoming events. Check back again another time!
+{% endif %}
+
 {% endblock %}
