@@ -1,10 +1,13 @@
+from email.message import Message
+
 from flask import abort, jsonify, redirect, render_template, request
 from flask_login import login_required, login_user, logout_user
+from flask_sqlalchemy.model import Model
 from sqlalchemy import func
 from flask_json import FlaskJSON, json_response, as_json
 from werkzeug.exceptions import BadRequestKeyError
 
-from model import Admin, Tour, Feedback, db, Review, tour_places, Place
+from model import Admin, Tour, Feedback, db, Review, tour_places, Place, Welcome, Event
 from mail import send_feedback_email
 from map import get_ordered_places_for_tour
 
@@ -18,7 +21,9 @@ def register_routes(app):
 
     @app.route("/")
     def root():
-        return render_template("home.html")
+        col = Welcome.query.all()
+        event = Event.query.where(Event.is_public == 1).all()
+        return render_template("home.html", col=col, event=event)
 
     @app.route("/Tours")
     def see_tours():
@@ -143,7 +148,7 @@ def register_routes(app):
     def edittours():
         tours = Tour.query.all()
         return render_template(
-            "edittours.html",
+            "adminedittours.html",
             tours=tours
         )
 
@@ -166,7 +171,7 @@ def register_routes(app):
         db.session.commit()
 
         return render_template(
-            "editTour.html",
+            "admineditTour.html",
             tour=currtour
         )
 
@@ -175,7 +180,7 @@ def register_routes(app):
     def edittour(tour_id):
         currtour = Tour.query.filter_by(id=tour_id).first()
         return render_template(
-            "editTour.html",
+            "admineditTour.html",
             tour=currtour
         )
 
@@ -306,14 +311,66 @@ def register_routes(app):
             db.session.commit()
             return redirect('/')
 
-    @app.route('/delete/<int:id>', methods=['POST'])
+#edit welcome message
+    @app.route("/editwelcome")
     @login_required
-    def delete(id):
+    def editwelcome():
+        welcome = Welcome.query.first()
+        return render_template("admineditwelcome.html", welcome=welcome)
+
+    @app.route("/addmessage", methods=["POST"])
+    @login_required
+    def add_message():
+        #add database stuff
+        return redirect("/editwelcome")
+
+#edit events
+    @app.route("/editevent")
+    @login_required
+    def editedvent():
+        event = Event.query.all()
+        return render_template("admineditevent.html", event=event)
+
+    @app.route("/addevent", methods=["POST"])
+    @login_required
+    def add_event():
+        title = request.form.get("title")
+        message = request.form.get("message")
+        is_public = 1 if request.form.get("is_public") == "1" else 0
+        if title and message:
+            new_event = Event(title=title, message=message, is_public=is_public)
+            db.session.add(new_event)
+            db.session.commit()
+        return redirect("/editevent")
+
+    @app.route("/updateevent", methods=["POST"])
+    @login_required
+    def update_event():
+        events = Event.query.all()
+        for i in events:
+            is_public = request.form.get(f"is_public_{i.id}")
+            i.is_public = 1 if is_public == "1" else 0
+        db.session.commit()
+        return redirect("/editevent")
+
+    @app.route('/deleteevent/<int:id>', methods=['POST'])
+    @login_required
+    def deleteevent(id):
+        res = Event.query.filter_by(id=id).first()
+        db.session.delete(res)
+        db.session.commit()
+        return '',204
+
+#delete review
+    @app.route('/deletereview/<int:id>', methods=['POST'])
+    @login_required
+    def deletereview(id):
         res = Review.query.filter_by(id=id).first()
         db.session.delete(res)
         db.session.commit()
         return '',204
 
+#error handling
     @app.errorhandler(404)
     def e404(err):
 
@@ -338,3 +395,4 @@ def register_routes(app):
             return render_template('adminerror.html', err=403)
         else:
             return render_template('errorPage.html', err=403)
+
