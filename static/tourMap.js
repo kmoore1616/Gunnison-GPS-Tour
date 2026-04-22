@@ -15,23 +15,24 @@ let stopMarkerPinElement;
 let target;
 
 const mapElement = document.querySelector("gmp-map");
-
+// Reads tour id passed in by python
 function getTourId() {
     return document.getElementById("tour-id").innerHTML;
 }
 
+// generates random color for routes on tour overview
 function getRandomColor() {
     return "#" + Math.floor(Math.random() * 16777215).toString(16);
 }
-
+// Builds contents for when a pin is clicked
 function createStopInfoContent(stop) {
     const content = document.createElement("div");
 
     const name = document.createElement("h3");
-    name.textContent = stop.name;
+    name.innerHTML = stop.name;
 
     const description = document.createElement("p");
-    description.textContent = stop.description;
+    description.innerHTML = stop.description;
 
     content.appendChild(name);
     content.appendChild(description);
@@ -39,11 +40,13 @@ function createStopInfoContent(stop) {
     return content;
 }
 
-function shouldShowStopInfo() {
+// Detects if onTour (endtourbutton exists there and nowhere else)
+function onTourPage() {
     const endTourButton = document.getElementById("endButton");
     return endTourButton !== null;
 }
 
+// Marks next stop as gold and future stops in grey
 function getStopMarkerColor(isNextStop) {
     if (isNextStop) {
         return "#D4A017";
@@ -51,7 +54,7 @@ function getStopMarkerColor(isNextStop) {
 
     return "#8A8F98";
 }
-
+// Creates pin on stops
 function createStopMarkerContent(PinElement, isNextStop) {
     const pin = new PinElement({
         background: getStopMarkerColor(isNextStop),
@@ -62,6 +65,7 @@ function createStopMarkerContent(PinElement, isNextStop) {
     return pin.element;
 }
 
+// Updates stop colors after user reaches next stop
 function updateNextStopMarker(nextStopIndex) {
     for (let i = 0; i < stopMarkers.length; i += 1) {
         const marker = stopMarkers[i];
@@ -70,7 +74,7 @@ function updateNextStopMarker(nextStopIndex) {
         marker.content = createStopMarkerContent(stopMarkerPinElement, isNextStop);
     }
 }
-
+// Removes stops that have been visited
 function hideCompletedTourParts(completedStopIndex) {
     const marker = stopMarkers[completedStopIndex];
 
@@ -85,11 +89,13 @@ function hideCompletedTourParts(completedStopIndex) {
     }
 }
 
+// Creates one stop marker pin
+// Different behavior if onTour versus viewing tour
 function createStopMarker(map, AdvancedMarkerElement, PinElement, stop, stopNumber, infoWindow) {
-    const isOnTour = shouldShowStopInfo();
+    const isOnTour = onTourPage();
     let markerContent;
 
-    if (isOnTour) {
+    if (isOnTour) { //
         const stopIndex = stopNumber - 1;
         const isNextStop = stopIndex === 0;
         markerContent = createStopMarkerContent(PinElement, isNextStop);
@@ -138,7 +144,7 @@ async function drawTourPolylines(map, tourId, AdvancedMarkerElement, PinElement)
     target = { lat: firstStop.lat, lng: firstStop.lng };
 
     const infoWindow = new google.maps.InfoWindow();
-    const isOnTour = shouldShowStopInfo();
+    const isOnTour = onTourPage();
     stopMarkerPinElement = PinElement;
 
     for (let i = 0; i < stops.length; i += 1) {

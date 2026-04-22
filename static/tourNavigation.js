@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Takes shared features from view tour and adds navigation and other onTour specific functionality
+
 import {openPopup} from './popup.js'
 import {hideCompletedTourParts, mapElement, tourMapReady, updateNextStopMarker} from './tourMap.js'
 
@@ -24,12 +26,14 @@ let imHereButton;
 
 const tour_id = document.getElementById("tour-id").textContent.trim();
 
+// Gps Options
 const options = {
     enableHighAccuracy: false,
     timeout: 5000,
     maximumAge: 0,
 };
 
+// Sets up marker for user position
 function createCurrentLocationMarkerContent() {
     const markerContent = document.createElement("div");
     markerContent.style.width = "0";
@@ -44,6 +48,7 @@ function createCurrentLocationMarkerContent() {
     return markerContent;
 }
 
+// Attaches functionality to tour buttons
 function setupTourButtons() {
     let skip_element = document.getElementById("skipButton")
     let
@@ -64,10 +69,10 @@ function setupTourButtons() {
     }
 
     if (imHereButton != null){
-        imHereButton.addEventListener("click", openCurrentStopPopup);
+        imHereButton.addEventListener("click", advanceToNextStop);
     }
 }
-
+// Only show recenter if user pans
 function showRecenterButton() {
     if (recenterButton != null && latestUserPosition != null) {
         recenterButton.hidden = false;
@@ -79,7 +84,7 @@ function hideRecenterButton() {
         recenterButton.hidden = true;
     }
 }
-
+// Recenter button functionality
 function recenterOnUser() {
     if (latestUserPosition == null) {
         return;
@@ -87,43 +92,6 @@ function recenterOnUser() {
 
     globalMap.panTo(latestUserPosition);
     hideRecenterButton();
-}
-
-function closeStopPopup() {
-    const overlay = document.getElementById("stopPopupOverlay");
-
-    if (overlay) {
-        overlay.remove();
-    }
-}
-
-function openCurrentStopPopup() {
-    const stop = stops[currentStopIndex];
-
-    if (stop == null || document.getElementById("stopPopupOverlay")) {
-        return;
-    }
-
-    const params = new URLSearchParams();
-    params.set("name", stop.name);
-    params.set("description", stop.description);
-
-    fetch(`/stop-popup?${params.toString()}`)
-        .then(response => response.text())
-        .then(html => {
-            const temp = document.createElement("div");
-            temp.innerHTML = html;
-
-            const overlay = temp.querySelector("#stopPopupOverlay");
-            document.body.appendChild(overlay);
-            requestAnimationFrame(() => overlay.classList.add("show"));
-
-            document.getElementById("closeStopPopup").addEventListener("click", closeStopPopup);
-            document.getElementById("continueStopPopup").addEventListener("click", () => {
-                closeStopPopup();
-                advanceToNextStop();
-            });
-        });
 }
 
 function setTargetToStop(stopIndex) {
