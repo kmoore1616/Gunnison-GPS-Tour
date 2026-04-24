@@ -1,0 +1,10 @@
+better_profanity==0.7.0
+Flask==3.1.3
+Flask_JSON==0.4.0
+Flask_Login==0.6.3
+flask_mail==0.10.0
+flask_sqlalchemy==3.1.1
+python-dotenv==1.2.2
+Requests==2.33.1
+SQLAlchemy==2.0.49
+Werkzeug==3.1.8
