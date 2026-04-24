@@ -7,7 +7,7 @@
 
 // Takes shared features from view tour and adds navigation and other onTour specific functionality
 
-import {openPopup} from './popup.js'
+import {openPopup, openStopPopup} from './popup.js'
 import {hideCompletedTourParts, mapElement, tourMapReady, updateNextStopMarker} from './tourMap.js'
 
 let id;
@@ -25,10 +25,12 @@ let recenterButton;
 let imHereButton;
 
 const tour_id = document.getElementById("tour-id").textContent.trim();
+let stop_name = document.getElementById("next-stop-name")
+
 
 // Gps Options
 const options = {
-    enableHighAccuracy: false,
+    enableHighAccuracy: true,
     timeout: 5000,
     maximumAge: 0,
 };
@@ -51,8 +53,7 @@ function createCurrentLocationMarkerContent() {
 // Attaches functionality to tour buttons
 function setupTourButtons() {
     let skip_element = document.getElementById("skipButton")
-    let
-        end_element = document.getElementById("endButton")
+    let end_element = document.getElementById("endButton")
     recenterButton = document.getElementById("recenterButton")
     imHereButton = document.getElementById("imHereButton")
 
@@ -69,19 +70,20 @@ function setupTourButtons() {
     }
 
     if (imHereButton != null){
-        imHereButton.addEventListener("click", advanceToNextStop);
+        imHereButton.addEventListener("click", showCurrentStopPopup);
     }
 }
+
 // Only show recenter if user pans
 function showRecenterButton() {
     if (recenterButton != null && latestUserPosition != null) {
         recenterButton.hidden = false;
     }
 }
-
+// Note, recent button will now always be visible
 function hideRecenterButton() {
     if (recenterButton != null) {
-        recenterButton.hidden = true;
+        // recenterButton.hidden = true;
     }
 }
 // Recenter button functionality
@@ -94,11 +96,23 @@ function recenterOnUser() {
     hideRecenterButton();
 }
 
+function showCurrentStopPopup() {
+    const currentStop = stops[currentStopIndex];
+
+    if (currentStop == null) {
+        return;
+    }
+
+    openStopPopup(currentStop.name, currentStop.description, advanceToNextStop);
+}
+
+// Sets the next navigation target (the next stop on the tour)
 function setTargetToStop(stopIndex) {
     const stop = stops[stopIndex];
     target = { lat: stop.lat, lng: stop.lng };
 }
 
+// redraw if user latest position updates (keeps tracking user)
 function routeUserToCurrentTarget() {
     if (latestUserPosition == null) {
         return;
@@ -120,6 +134,7 @@ function advanceToNextStop() {
     setTargetToStop(currentStopIndex);
     updateNextStopMarker(currentStopIndex);
     routeUserToCurrentTarget();
+    stop_name.innerHTML = "Next Stop: " + stops[currentStopIndex].name;
     return true;
 }
 
@@ -225,6 +240,8 @@ async function initTourNavigation() {
     route = tourMap.route;
     stops = tourMap.stops;
     target = tourMap.target;
+
+    stop_name.innerHTML = "Next Stop: " + stops[0].name;
 
     if (stops.length === 0) {
         return;
