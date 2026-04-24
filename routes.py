@@ -295,6 +295,16 @@ def register_routes(app):
         tour_id = request.args.get('tour_id')
         return render_template('popup.html', tour_id=tour_id)
 
+    @app.route('/stop_popup')
+    def stop_popup():
+        stop_name = request.args.get('stop_name')
+        stop_description = request.args.get('stop_description')
+        return render_template(
+            'stopPopup.html',
+            stop_name=stop_name,
+            stop_description=stop_description,
+        )
+
     @app.route('/tourfeedback', methods=['GET', 'POST'])
     def tourreview():
         if request.method == 'POST':
