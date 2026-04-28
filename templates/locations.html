@@ -1,0 +1,21 @@
+{% extends "visitornav.html" %}
+{% block content %}
+<h1> Locations </h1>
+<body id="home">
+        <div class="dropdown">
+      <button class="dropdownbtn">Filter</button>
+      <div class="dropdown-content">
+          <a href="/Locations">All</a>
+          {% for i in tourlocations %}
+        <a href="/Locations?tour_id={{ i[0] }}">{{ i[1] }}</a>
+          {% endfor %}
+      </div>
+    </div>
+  <table>
+    {% for i in col %}
+    <tr>
+      <td><a href="/Places/{{i[0]}}">{{ i[1] }}</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

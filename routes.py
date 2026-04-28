@@ -1,12 +1,18 @@
 import requests
 from flask import abort, jsonify, redirect, render_template, request, current_app
+from email.message import Message
+
+from flask import abort, jsonify, redirect, render_template, request
 from flask_login import login_required, login_user, logout_user
+from flask_sqlalchemy.model import Model
+from sqlalchemy import func
 from flask_json import FlaskJSON, json_response, as_json
 from werkzeug.exceptions import BadRequestKeyError
 from sqlalchemy import text
 
-from model import Admin, Tour, Feedback, db, Review, tour_places, Place
+from model import Admin, Tour, Feedback, db, Review, tour_places, Place, Welcome, Event
 from mail import send_feedback_email
+from map import get_ordered_places_for_tour
 
 
 def json_answer(texts):
@@ -18,30 +24,66 @@ def register_routes(app):
 
     @app.route("/")
     def root():
-        return render_template("home.html")
+        col = Welcome.query.all()
+        event = Event.query.where(Event.is_public == 1).all()
+        return render_template("home.html", col=col, event=event)
 
     @app.route("/Tours")
     def see_tours():
         col = []
-        entries = Tour.query.all()
+
+        sort_tour = request.args.get("sort_tour","none")
+
+        if sort_tour == "longest":
+            entries = Tour.query.order_by(Tour.estimated_completion_time.desc()).all()
+        elif sort_tour == "shortest":
+            entries = Tour.query.order_by(Tour.estimated_completion_time.asc()).all()
+        elif sort_tour == "highreview":
+            entries = Tour.query.join(Review).group_by(Tour.id).order_by(func.avg(Review.rating).desc()).all()
+        elif sort_tour == "lowreview":
+            entries = Tour.query.join(Review).group_by(Tour.id).order_by(func.avg(Review.rating).asc()).all()
+        elif sort_tour == "atoz":
+            entries = Tour.query.order_by(Tour.name.asc()).all()
+        elif sort_tour == "ztoa":
+            entries = Tour.query.order_by(Tour.name.desc()).all()
+        else:
+            entries = Tour.query.all()
+
         for entry in entries:
-            col.append([entry.id, entry.name, entry.description])
+            avg_rating = db.session.query(func.avg(Review.rating)).filter_by(tour_id=entry.id).scalar()
+            col.append([entry.id, entry.name, entry.description,avg_rating or "Be the first to review it"])
         return render_template("tour_list.html", col=col)
 
-    @app.route("/Places")
-    def place():
-        return render_template("places.html")
+    @app.route("/Locations")
+    def locations():
+        col = []
 
-    @app.route("/Tour")
-    def tour():
-        tour_list = 1
-        return render_template("onTour.html", tour_list=tour_list)
+        dropdown = Tour.query.all()
+        tourlocations = [(k.id, k.name) for k in dropdown]
 
-    @app.route("/Contact")
-    def contact():
-        return render_template("contact.html")
+        tour_id=request.args.get('tour_id',type=int)
+        if tour_id:
+            entries = Place.query.join(tour_places, Place.id == tour_places.c.place_id).filter(tour_places.c.tour_id == tour_id).all()
+        else:
+            entries = Place.query.order_by(Place.name).all()
 
-    @app.route("/feedback", methods=["GET", "POST"])
+        for k in entries:
+            col.append([k.id,k.name])
+        return render_template("locations.html",col=col,tourlocations=tourlocations)
+
+    @app.route("/Places/<place_id>")
+    def place(place_id):
+        col = []
+        entries = Place.query.filter_by(id=place_id).all()
+
+        feat_tours= Tour.query.join(tour_places,Tour.id==tour_places.c.tour_id).filter(tour_places.c.place_id==place_id).all()
+
+        for k in entries:
+            col.append([k.id,k.name,k.description])
+        return render_template("places.html", col=col,feat_tours=feat_tours)
+
+
+    @app.route("/Contact", methods=["GET", "POST"])
     def feedback():
         if request.method == "POST":
             name = request.form['name']
@@ -67,7 +109,10 @@ def register_routes(app):
     def viewtour(tour_id):
         currtour = Tour.query.filter_by(id=tour_id).first()
 
-        places = db.session.query(Place).join(tour_places, tour_places.c.place_id == Place.id).filter(tour_places.c.tour_id == tour_id).all()
+        if currtour is None:
+            abort(404)
+
+        places = get_ordered_places_for_tour(tour_id)
 
         col = [(p.id, p.name, p.description)
                for p in places]
@@ -80,6 +125,21 @@ def register_routes(app):
             time=currtour.estimated_completion_time,
             col=col
         )
+
+
+    @app.route("/onTour/<tour_id>")
+    def onTour(tour_id):
+        currtour = Tour.query.filter_by(id=tour_id).first()
+
+        if currtour is None:
+            abort(404)
+
+        return render_template(
+            "onTour.html",
+            tour_id=tour_id,
+            tour=currtour.name,
+        )
+
 
     @app.route("/adminhome")
     @login_required
@@ -652,6 +712,7 @@ def register_routes(app):
             return json_response(places=currplaces)
 
     @app.route("/api/get_public", methods=['POST'])
+    @login_required
     @as_json
     def get_public():
         if request.method == 'POST':
@@ -671,11 +732,6 @@ def register_routes(app):
             db.session.delete(currtour)
             db.session.commit()
             return json_response(result=0)
-
-    @app.route("/adminfeedback")
-    @login_required
-    def adminfeedback():
-        return render_template("adminfeedback.html")
 
     @app.route("/adminreviews")
     @login_required
@@ -728,6 +784,16 @@ def register_routes(app):
         tour_id = request.args.get('tour_id')
         return render_template('popup.html', tour_id=tour_id)
 
+    @app.route('/stop_popup')
+    def stop_popup():
+        stop_name = request.args.get('stop_name')
+        stop_description = request.args.get('stop_description')
+        return render_template(
+            'stopPopup.html',
+            stop_name=stop_name,
+            stop_description=stop_description,
+        )
+
     @app.route('/tourfeedback', methods=['GET', 'POST'])
     def tourreview():
         if request.method == 'POST':
@@ -739,11 +805,88 @@ def register_routes(app):
             db.session.commit()
             return redirect('/')
 
-    @app.route('/delete/<int:id>', methods=['POST'])
+#edit welcome message
+    @app.route("/editwelcome")
     @login_required
-    def delete(id):
+    def editwelcome():
+        welcome = Welcome.query.first()
+        return render_template("admineditwelcome.html", welcome=welcome)
+
+    @app.route("/addmessage", methods=["POST"])
+    @login_required
+    def add_message():
+        #add database stuff
+        return redirect("/editwelcome")
+
+#edit events
+    @app.route("/editevent")
+    @login_required
+    def editedvent():
+        event = Event.query.all()
+        return render_template("admineditevent.html", event=event)
+
+    @app.route("/addevent", methods=["POST"])
+    @login_required
+    def add_event():
+        title = request.form.get("title")
+        message = request.form.get("message")
+        is_public = 1 if request.form.get("is_public") == "1" else 0
+        if title and message:
+            new_event = Event(title=title, message=message, is_public=is_public)
+            db.session.add(new_event)
+            db.session.commit()
+        return redirect("/editevent")
+
+    @app.route("/updateevent", methods=["POST"])
+    @login_required
+    def update_event():
+        events = Event.query.all()
+        for i in events:
+            is_public = request.form.get(f"is_public_{i.id}")
+            i.is_public = 1 if is_public == "1" else 0
+        db.session.commit()
+        return redirect("/editevent")
+
+    @app.route('/deleteevent/<int:id>', methods=['POST'])
+    @login_required
+    def deleteevent(id):
+        res = Event.query.filter_by(id=id).first()
+        db.session.delete(res)
+        db.session.commit()
+        return '',204
+
+#delete review
+    @app.route('/deletereview/<int:id>', methods=['POST'])
+    @login_required
+    def deletereview(id):
         res = Review.query.filter_by(id=id).first()
         db.session.delete(res)
         db.session.commit()
         return '',204
+
+#error handling
+    @app.errorhandler(404)
+    def e404(err):
+
+        path = request.path
+        if path.startswith('/admin'):
+            return render_template('adminerror.html', err=404)
+        else:
+            return render_template('errorPage.html',err=404)
+
+    @app.errorhandler(401)
+    def unauthorized_handler(err):
+        path = request.path
+        if path.startswith('/admin'):
+            return render_template('adminerror.html', err=401)
+        else:
+            return render_template('errorPage.html', err=401)
+
+    @app.errorhandler(403)
+    def forbidden_handler(err):
+        path = request.path
+        if path.startswith('/admin'):
+            return render_template('adminerror.html', err=403)
+        else:
+            return render_template('errorPage.html', err=403)
 

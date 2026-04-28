@@ -24,8 +24,44 @@ export function openPopup(tour_id) {
     });
 }
 
+export function openStopPopup(stop_name, stop_description, onContinue) {
+  if (document.getElementById('stopPopupOverlay')){
+    return;
+  }
+
+  const params = new URLSearchParams();
+  params.set('stop_name', stop_name);
+  params.set('stop_description', stop_description);
+
+  fetch(`/stop_popup?${params.toString()}`)
+    .then(response => response.text())
+    .then(html => {
+      const temp = document.createElement('div');
+      temp.innerHTML = html;
+
+      const overlay = temp.querySelector('#stopPopupOverlay');
+      document.body.appendChild(overlay);
+      requestAnimationFrame(() => overlay.classList.add('show'));
+
+      document.getElementById('closeStopPopup').addEventListener('click', closeStopPopup);
+      document.getElementById('continueStopPopup').addEventListener('click', () => {
+        closeStopPopup();
+
+        if (onContinue) {
+          onContinue();
+        }
+      });
+    });
+}
+
 export function closePopup() {
   const overlay = document.getElementById('popupOverlay');
+  if (overlay) overlay.remove();
+  window.location.href = '/';
+}
+
+export function closeStopPopup() {
+  const overlay = document.getElementById('stopPopupOverlay');
   if (overlay) overlay.remove();
 }
 
