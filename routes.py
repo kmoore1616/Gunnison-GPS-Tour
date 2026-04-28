@@ -192,10 +192,7 @@ def register_routes(app):
     def savetour(tour_id):
         if request.method == 'POST':
             currtour = Tour.query.filter_by(id=tour_id).first()
-            try:
-                name = request.form['name']
-            except Exception:
-                print("Tour with that name already exists")
+            name = request.form['name']
             description = request.form['description']
             try:
                 is_public = request.form['is_public']
