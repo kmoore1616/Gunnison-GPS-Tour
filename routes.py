@@ -10,7 +10,7 @@ from flask_json import FlaskJSON, json_response, as_json
 from werkzeug.exceptions import BadRequestKeyError
 from sqlalchemy import text
 
-from model import Admin, Tour, Feedback, db, Review, tour_places, Place, Welcome, Event
+from model import Admin, Tour, Feedback, db, Review, tour_places, Place, Event
 from mail import send_feedback_email
 from map import get_ordered_places_for_tour
 
@@ -24,9 +24,8 @@ def register_routes(app):
 
     @app.route("/")
     def root():
-        col = Welcome.query.all()
         event = Event.query.where(Event.is_public == 1).all()
-        return render_template("home.html", col=col, event=event)
+        return render_template("home.html", event=event)
 
     @app.route("/Tours")
     def see_tours():
@@ -151,7 +150,7 @@ def register_routes(app):
     def edittours():
         tours = Tour.query.all()
         return render_template(
-            "edittours.html",
+            "adminedittours.html",
             tours=tours
         )
 
@@ -174,7 +173,7 @@ def register_routes(app):
         db.session.commit()
 
         return render_template(
-            "editTour.html",
+            "admineditTour.html",
             tour=currtour
         )
 
@@ -183,7 +182,7 @@ def register_routes(app):
     def edittour(tour_id):
         currtour = Tour.query.filter_by(id=tour_id).first()
         return render_template(
-            "editTour.html",
+            "admineditTour.html",
             tour=currtour,
             error="none"
         )
@@ -298,7 +297,7 @@ def register_routes(app):
                 if target_place["stop_num"] != 1:
                     previous_place = db.session.execute(
                         tour_places.select().where(tour_places.c.tour_id == currtour.id,
-                                                   tour_places.c.next_stop_place_id == place_id)
+                                                   tour_places.c.stop_num == target_place["stop_num"] - 1)
                     ).mappings().first()
 
                     target_id = target_place["place_id"]
@@ -394,7 +393,7 @@ def register_routes(app):
                 if target_place["stop_num"] != count:
                     next_place = db.session.execute(
                         tour_places.select().where(tour_places.c.tour_id == currtour.id,
-                                                   tour_places.c.place_id == target_place["next_stop_place_id"])
+                                                   tour_places.c.stop_num == target_place["stop_num"] + 1)
                     ).mappings().first()
 
                     target_id = target_place["place_id"]
@@ -593,12 +592,12 @@ def register_routes(app):
                             print("Error connecting to geolocation api")
                             print("STATUS:", response.status_code)
                             print("TEXT:", response.text)
-                            return render_template("editTour.html", tour=currtour, error="geolocation_error")
+                            return render_template("admineditTour.html", tour=currtour, error="geolocation_error")
 
                         try:
                             location_info = response.json()
                         except Exception:
-                            return render_template("editTour.html", tour=currtour, error="json_error")
+                            return render_template("admineditTour.html", tour=currtour, error="json_error")
 
                         try:
                             results = location_info.get("results")
@@ -607,7 +606,7 @@ def register_routes(app):
                             coords = geometry.get("location")
                         except Exception:
                             print("Invalid address")
-                            return render_template("editTour.html", tour=currtour, error="invalid_address")
+                            return render_template("admineditTour.html", tour=currtour, error="invalid_address")
 
                         lat = coords.get("lat")
                         lng = coords.get("lng")
@@ -617,7 +616,7 @@ def register_routes(app):
                         db.session.commit()
 
                         this_place = Place.query.filter_by(name=name).first()
-                        query = tour_places.select().where(tour_places.c.tour_id == currtour.id)
+                        query = tour_places.select().where(tour_places.c.tour_id == currtour.id).order_by(tour_places.c.stop_num.asc())
                         result = db.session.execute(query)
                         rows = result.all()
                         count = len(rows)
@@ -666,15 +665,15 @@ def register_routes(app):
                                 {"stop_num": 1, "currtour_id": currtour.id, "place_id": this_place.id}
                             )
                     else:
-                        return render_template("editTour.html", tour=currtour, error="description_missing")
+                        return render_template("admineditTour.html", tour=currtour, error="description_missing")
                 else:
-                    return render_template("editTour.html", tour=currtour, error="address_missing")
+                    return render_template("admineditTour.html", tour=currtour, error="address_missing")
             else:
-                return render_template("editTour.html", tour=currtour, error="empty_stop")
+                return render_template("admineditTour.html", tour=currtour, error="empty_stop")
 
             db.session.commit()
 
-            return render_template("editTour.html", tour=currtour, error="none")
+            return render_template("admineditTour.html", tour=currtour, error="none")
 
     @app.route("/api/get_ordered_stops", methods=['POST'])
     @as_json
@@ -805,19 +804,6 @@ def register_routes(app):
             db.session.commit()
             return redirect('/')
 
-#edit welcome message
-    @app.route("/editwelcome")
-    @login_required
-    def editwelcome():
-        welcome = Welcome.query.first()
-        return render_template("admineditwelcome.html", welcome=welcome)
-
-    @app.route("/addmessage", methods=["POST"])
-    @login_required
-    def add_message():
-        #add database stuff
-        return redirect("/editwelcome")
-
 #edit events
     @app.route("/editevent")
     @login_required
@@ -889,4 +875,3 @@ def register_routes(app):
             return render_template('adminerror.html', err=403)
         else:
             return render_template('errorPage.html', err=403)
-
