@@ -793,7 +793,7 @@ def register_routes(app):
             stop_description=stop_description,
         )
 
-    @app.route('/tourfeedback', methods=['GET', 'POST'])
+    @app.route('/tourfeedback', methods=['POST'])
     def tourreview():
         if request.method == 'POST':
             comment = request.form['comment']

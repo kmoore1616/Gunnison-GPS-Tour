@@ -7,7 +7,7 @@ const throttle = (func, time = 100) => {
     const now = new Date();
     if (now - lastTime >= time) {
       func();
-      lasttime = now;
+      lastTime = now;
     }
   };
 };
