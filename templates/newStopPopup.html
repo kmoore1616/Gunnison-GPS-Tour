@@ -9,9 +9,13 @@
             </select>
 
             <h4>Create New Place</h4>
-            <input type="text" name="name" placeholder="Name">
-            <input type="text" name="address" placeholder="Address">
-            <textarea name="description" placeholder="Description"></textarea>
+            <input type="text" name="name" placeholder="Name"><br>
+            <input type="text" name="address" placeholder="Address or Coordinates">
+            <p>
+                <b>E.g. Address:</b> 500 E Tomichi Ave, Gunnison, CO 81230<br>
+                <b>E.g. Coordinates:</b> 38.544796453454204, -106.92133686214214
+            </p>
+            <textarea name="description" placeholder="Description"></textarea><br>
 
             <input type="hidden" id="editTourName" name="tour_name" value="{{name}}">
             <button type="submit" id="submitStop">Submit</button>
