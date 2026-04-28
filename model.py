@@ -10,7 +10,7 @@ tour_places = db.Table(
     db.Column("tour_id", db.Integer, db.ForeignKey("tour.id"), primary_key=True),
     db.Column("place_id", db.Integer, db.ForeignKey("place.id"), primary_key=True),
     db.Column("next_stop_place_id", db.Integer, db.ForeignKey("place.id"), nullable=True),
-    db.Column("start", db.Boolean, default=False),
+    db.Column("stop_num", db.Integer, nullable=False, default=0)
 )
 
 
@@ -67,12 +67,6 @@ class Admin(UserMixin, db.Model):
 
 
 # MESSAGES DATABASE - FOR FRONT PAGE WELCOME MESSAGES
-class Welcome(db.Model):
-    __bind_key__ = 'messages'
-    id = db.Column(db.Integer, primary_key=True)
-    message = db.Column(db.String(10000), nullable=False, default="Welcome to the Gunnison GPS Walking Tours experience!")
-
-
 class Event(db.Model):
     __bind_key__ = 'messages'
     id = db.Column(db.Integer, primary_key=True)

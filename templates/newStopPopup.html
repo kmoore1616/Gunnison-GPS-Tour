@@ -1,0 +1,23 @@
+<div id="new_stop_popup" class="overlay-container">
+    <div class="popup-box">
+        <h3>Add New Stop</h3>
+
+        <form class="form-container" action="/api/addPlaceToTour" method="post">
+            <h4>Choose Existing Place</h4>
+            <select id="location_dropdown" name="existingLocation">
+                <option value="none"> - Choose Existing Place - </option>
+            </select>
+
+            <h4>Create New Place</h4>
+            <input type="text" name="name" placeholder="Name">
+            <input type="text" name="address" placeholder="Address">
+            <textarea name="description" placeholder="Description"></textarea>
+
+            <input type="hidden" id="editTourName" name="tour_name" value="{{name}}">
+            <button type="submit" id="submitStop">Submit</button>
+        </form>
+
+        <button type="button" id="cancelNewPopup">Cancel</button>
+
+    </div>
+</div>

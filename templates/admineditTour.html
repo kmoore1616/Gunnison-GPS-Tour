@@ -1,8 +1,8 @@
 {% extends "adminnav.html" %}
 {% block title %} Tours {% endblock %}
 {% block content %}
+<script src="/static/tourEditor.js"></script>
 <body id="tourEditor">
-    <script src="/static/tourEditor.js"></script>
     <h1 id="editTourName">{{ tour.name }}</h1>
     <h3>Tour Rating: {{ tour.average_rating }} Stars</h3>
     <h3>Estimated Length: {{ tour.estimated_completion_time }} Minutes</h3>
@@ -21,21 +21,14 @@
 
             <table id="edit-tour-places">
                 <tr id="edit-tour-headers">
-                    <th colspan="4">Tour Stops</th>
+                    <th colspan="5">Tour Stops</th>
                 </tr>
                 <tr id="add-stop-button">
-                    <td colspan="4">Add Stop</td>
+                    <td colspan="5"><button type="button" onclick="addStop('{{tour.name}}')">Add Stop</button></td>
                 </tr>
-                {% for p in tour.places %}
-                    <tr class="edit-tour-items">
-                        <td>{{p.name}}</td>
-                        <td><button class="{{p.id}}" type="button" onclick="movePlaceUp(this)">Move Up</button></td>
-                        <td><button class="{{p.id}}" type="button" onclick="movePlaceDown(this)">Move Down</button></td>
-                        <td><button class="{{p.id}}" type="button" onclick="removeStop(this)">Remove Stop</button></td>
-                    </tr>
-                {% endfor %}
             </table>
 
+            <input type="hidden" id="admin_error_code" value="{{error}}">
             <input type="submit" value="SAVE">
         </fieldset>
     </form>
