@@ -7,12 +7,12 @@ window.onload = function(){
     });
 };
 
-function go(text){
-    if(text == "success"){
+function go(texts){
+    if(texts == "success"){
         window.location = '/adminhome';
     }
     else{
-        document.getElementById('error').innerHTML = text;
+        document.getElementById('error').innerHTML = texts;
         document.getElementById('username').value = "";
         document.getElementById('password').value = "";
     }
@@ -26,8 +26,8 @@ function login(){
     xhttp.onreadystatechange = function(){
         if(this.readyState === 4 && this.status === 200){
             var json = JSON.parse(this.responseText);
-            var text = json['text'];
-            go(text);
+            var texts = json['texts'];
+            go(texts);
         }
     };
     var data = {username: username, password: password};
