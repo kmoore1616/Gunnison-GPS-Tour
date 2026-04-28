@@ -34,19 +34,19 @@ def register_routes(app):
         sort_tour = request.args.get("sort_tour","none")
 
         if sort_tour == "longest":
-            entries = Tour.query.order_by(Tour.estimated_completion_time.desc()).all()
+            entries = Tour.query.filter(Tour.is_public=="on").order_by(Tour.estimated_completion_time.desc()).all()
         elif sort_tour == "shortest":
-            entries = Tour.query.order_by(Tour.estimated_completion_time.asc()).all()
+            entries = Tour.query.filter(Tour.is_public=="on").order_by(Tour.estimated_completion_time.asc()).all()
         elif sort_tour == "highreview":
-            entries = Tour.query.join(Review).group_by(Tour.id).order_by(func.avg(Review.rating).desc()).all()
+            entries = Tour.query.filter(Tour.is_public=="on").join(Review).group_by(Tour.id).order_by(func.avg(Review.rating).desc()).all()
         elif sort_tour == "lowreview":
-            entries = Tour.query.join(Review).group_by(Tour.id).order_by(func.avg(Review.rating).asc()).all()
+            entries = Tour.query.filter(Tour.is_public=="on").join(Review).group_by(Tour.id).order_by(func.avg(Review.rating).asc()).all()
         elif sort_tour == "atoz":
-            entries = Tour.query.order_by(Tour.name.asc()).all()
+            entries = Tour.query.filter(Tour.is_public=="on").order_by(Tour.name.asc()).all()
         elif sort_tour == "ztoa":
-            entries = Tour.query.order_by(Tour.name.desc()).all()
+            entries = Tour.query.filter(Tour.is_public=="on").order_by(Tour.name.desc()).all()
         else:
-            entries = Tour.query.all()
+            entries = Tour.query.filter(Tour.is_public=="on").all()
 
         for entry in entries:
             avg_rating = db.session.query(func.avg(Review.rating)).filter_by(tour_id=entry.id).scalar()
