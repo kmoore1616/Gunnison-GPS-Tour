@@ -85,7 +85,7 @@
         d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n))
     })
     ({key: "AIzaSyA5NCmT4YZvoa5KVQcOF1XHN3B8PxNpapQ", v: "weekly"});</script>
-    <a class="btn btn-info" role="button" href="http://127.0.0.1:5000/onTour/{{ tour_id }}">Start Tour</a>
+    <a class="btn btn-info" role="button" href="/onTour/{{ tour_id }}">Start Tour</a>
     <div class="d-flex align-items-center">
         <span class="fs-6"> ★{{ rating }}</span>
         <span class="fs-8 ms-2" style="color: grey">Est. Time: {{ time }}</span>
