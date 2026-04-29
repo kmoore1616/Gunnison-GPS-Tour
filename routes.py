@@ -14,6 +14,8 @@ from model import Admin, Tour, Feedback, db, Review, tour_places, Place, Event
 from mail import send_feedback_email
 from map import get_ordered_places_for_tour
 
+import os
+
 
 def json_answer(texts):
     return jsonify({"texts": texts})
@@ -24,8 +26,12 @@ def register_routes(app):
 
     @app.route("/")
     def root():
+        image_folder = os.path.join(app.static_folder, 'photos')
+        images = os.listdir(image_folder)
+
+        col = Welcome.query.all()
         event = Event.query.where(Event.is_public == 1).all()
-        return render_template("home.html", event=event)
+        return render_template("home.html", col=col, event=event, images=images)
 
     @app.route("/Tours")
     def see_tours():
@@ -122,6 +128,7 @@ def register_routes(app):
             tour=currtour.name,
             rating=currtour.average_rating,
             time=currtour.estimated_completion_time,
+            description=currtour.description,
             col=col
         )
 
@@ -145,7 +152,7 @@ def register_routes(app):
     def adminhome():
         return render_template("adminhome.html")
 
-    @app.route("/edittours")
+    @app.route("/adminedittours")
     @login_required
     def edittours():
         tours = Tour.query.all()
@@ -814,8 +821,22 @@ def register_routes(app):
             db.session.commit()
             return redirect('/')
 
+
+#edit welcome message
+    @app.route("/admineditwelcome")
+    @login_required
+    def editwelcome():
+        welcome = Welcome.query.first()
+        return render_template("admineditwelcome.html", welcome=welcome)
+
+    @app.route("/addmessage", methods=["POST"])
+    @login_required
+    def add_message():
+        #add database stuff
+        return redirect("/editwelcome")
+
 #edit events
-    @app.route("/editevent")
+    @app.route("/admineditevent")
     @login_required
     def editedvent():
         event = Event.query.all()
@@ -885,3 +906,4 @@ def register_routes(app):
             return render_template('adminerror.html', err=403)
         else:
             return render_template('errorPage.html', err=403)
+

@@ -1,36 +1,73 @@
 {% extends "visitornav.html" %}
 {% block content %}
-<h1> Welcome! </h1>
-<p>
-    Welcome to the Gunnison GPS Walking Tours experience!
-    Discover the history, culture, and hidden gems of downtown Gunnison through interactive, self-guided tours.
-    Use your phone to follow curated routes, learn about local landmarks, and explore at your own pace.
-    Start your adventure and experience Gunnison like never before.
-</p>
 
-<div class="homeContainer">
-    <div class="homePageNav"><a href="/Tours">Tours</a></div><br>
-    <div class="homePageNav"><a href="/Locations">Locations</a></div><br>
-    <div class="homePageNav"><a href="/Contact">Get in Touch</a></div>
-</div>
+    <h1 class="page-header">
+        Welcome!
+    </h1>
 
-<h1>Upcoming Events</h1>
+    <p>
+        {% if welcome %}
+            {{ welcome.message }}
+        {% else %}
+            Welcome to the Gunnison GPS Walking Tours experience!
+            Discover the history, culture, and hidden gems of downtown Gunnison through interactive, self-guided tours.
+            Use your phone to follow curated routes, learn about local landmarks, and explore at your own pace.
+            Start your adventure and experience Gunnison like never before.
+        {% endif %}
+    </p>
+    <br><div id="slideshow" class="carousel slide" data-bs-ride="carousel">
 
-{% if event %}
- <!--Event Name -->
-  <table>
-    {% for i in event %}
-    <tr>
-      <td>{{ i.title }}</td>
-    </tr>
-    <tr>
-         <!--Event Description -->
-        <td>{{ i.message }}</td>
-    </tr>
+  <div class="carousel-indicators">
+    {% for image in images %}
+      <button type="button" data-bs-target="#slideshow" data-bs-slide-to="{{ loop.index0 }}"
+        {% if loop.first %}class="active"{% endif %}></button>
     {% endfor %}
-  </table>
-{% else %}
-    There are no upcoming events. Check back again another time!
-{% endif %}
+  </div>
+
+  <div class="carousel-inner">
+    {% for image in images %}
+      <div class="carousel-item {% if loop.first %}active{% endif %}">
+        <img src="/static/photos/{{ image }}" class="d-block w-100" alt="{{ image }}">
+      </div>
+    {% endfor %}
+  </div>
+
+  <button class="carousel-control-prev" type="button" data-bs-target="#slideshow" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#slideshow" data-bs-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </button>
+
+</div><br>
+
+    <div class="d-grid gap-3" style="margin: 20px;">
+        <a href="/Tours" class="btn btn-info" role="button">Tours</a>
+        <a href="/Locations" class="btn btn-info" role="button">Locations</a>
+        <a href="/Contact" class="btn btn-info" role="button">Contact Us</a>
+    </div>
+
+    <br>
+
+    <h1 class="page-header">
+        Upcoming Events
+    </h1>
+
+    {% if event %}
+        <!--Event Name -->
+        <table>
+            {% for i in event %}
+                <tr>
+                    <td>{{ i.title }}</td>
+                </tr>
+                <tr>
+                    <!--Event Description -->
+                    <td>{{ i.message }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        There are no upcoming events. Check back again another time!
+    {% endif %}
 
 {% endblock %}

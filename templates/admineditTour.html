@@ -8,7 +8,6 @@
     <h3>Estimated Length: {{ tour.estimated_completion_time }} Minutes</h3>
     <form action="/saveTour/{{tour.id}}" method="POST">
         <fieldset>
-            <legend>Edit Tour</legend>
 
             <label>Tour Name:</label>
             <input type="text" name="name" value="{{tour.name}}" required>
