@@ -1,27 +1,38 @@
 {% extends "visitornav.html" %}
 {% block content %}
 
-{% if success == "True" %}
-<script>
-    alert("Feedback sent successfully.");
-</script>
-{% elif success == "False" %}
-<script>
-    alert("Failed to send feedback.\nFields cannot be empty");
-</script>
-{% endif %}
+    {% if success == "True" %}
+        <script>
+            alert("Feedback sent successfully.");
+        </script>
+    {% elif success == "False" %}
+        <script>
+            alert("Failed to send feedback.\nFields cannot be empty");
+        </script>
+    {% endif %}
 
-<h1> Submit Feedback </h1>
-<form action="{{ url_for('feedback') }}" method="post">
-    Name:<br>
-    <input type="text" name="name"><br>
-    E-mail:<br>
-    <input type="text" name="mail"><br>
-    Comment:<br>
-    <input type="text" name="comment" size="50"><br><br>
-    <input type="submit" value="Send">
-    <input type="reset" value="Reset">
-</form>
+    <div class="feedback-page">
+        <div class="wrapper">
+            <h2>Contact Us</h2>
+            <form action="{{ url_for('feedback') }}" method="post">
+                <div class="input_field">
+                    <input type="text" name="name" placeholder="Name">
+                </div>
+                <div class="input_field">
+                    <input type="text" name="mail" placeholder="E-mail">
+                </div>
+                <div class="input_field">
+                    <textarea name="comment" placeholder="Comment"></textarea>
+                </div>
+                <div class="d-grid gap-2">
+                    <input type="submit" value="Send" class="btn btn-warning fw-bold text-uppercase py-2"
+                           style="letter-spacing: 5px;">
+                    <input type="reset" value="Reset" class="btn btn-secondary fw-bold text-uppercase py-2"
+                           style="letter-spacing: 5px; color: #332902;">
+                </div>
+
+            </form>
+        </div>
+    </div>
+
 {% endblock %}
-
-<!--https://codepen.io/mildrenben/pen/gbddEj-->

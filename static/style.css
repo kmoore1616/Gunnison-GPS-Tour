@@ -1,6 +1,7 @@
 body {
     padding-top: 15vh;
-    margin: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
     background-color: white;
     font-family: Poppins, "Poppins Fallback";
     transition: --scroll-delayed calc(var(--header-effect-duration) + .1s);
@@ -8,6 +9,35 @@ body {
     --scroll-speed: max(var(--scroll-velocity), -1 * var(--scroll-velocity));
     --scroll-direction: calc(var(--scroll-velocity) / var(--scroll-speed));
 }
+
+.page-header {
+  position: relative;
+  text-align: center;
+  margin: 2rem 0;
+  padding-bottom: 1rem;
+}
+
+.page-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #62c4b7;
+}
+
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+span{
+    color: rgb(238 213 87);
+}
+
+/* popup container--------------------------------------------------- */
 
 .btn-open-popup {
     padding: 12px 24px;
@@ -148,8 +178,10 @@ body {
     border-radius: 0.5rem;
 }
 
+/* ----------------------------------------------------------------- */
+
 .dropbtn {
-    background-color: #04AA6D;
+    background-color: rgba(63, 143, 135, 1);
     color: white;
     padding: 16px;
     font-size: 16px;
@@ -212,29 +244,10 @@ body {
     cursor: pointer;
 }
 
-.adminbutton:hover{
+.adminbutton:hover {
     background-color: rgb(238 213 87);
 }
 
-/*
-table {
-    border-collapse: collapse;
-    width: 100%;
-}
-
-th {
-    font-style: bold;
-}
-
-th, td {
-    text-align: left;
-    padding: 8px;
-}
-
-tr:nth-child(even) {
-    background-color: grey;
-}
-*/
 gmp-map {
     margin: 0 auto;
     margin-left: 5%;
@@ -251,7 +264,7 @@ gmp-map {
     z-index: 1;
     top: 0;
     right: 0;
-    background-color: #111;
+    background-color: rgb(241 241 241);
     overflow-x: hidden;
     transition: 0.5s;
     padding-top: 60px;
@@ -261,7 +274,7 @@ gmp-map {
     padding: 8px 8px 8px 32px;
     text-decoration: none;
     font-size: 25px;
-    color: #818181;
+    color: rgba(63, 143, 135, 1);
     display: block;
     transition: 0.3s;
 }
@@ -398,44 +411,6 @@ header {
 }
 
 /*----------------------------------------------------------------------*/
-.homeContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-height: 50vh;
-}
-
-.homePageNav {
-    min-height: 5vh;
-    min-width: 40vh;
-    background-color: #111;
-    padding: 4%;
-    border-radius: 3%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.homePageNav a {
-    text-align: center;
-    flex: block;
-    text-decoration: none;
-    font-size: 25px;
-    color: #818181;
-    display: block;
-    transition: 0.3s;
-
-}
-
-.homePageNav a:hover {
-    color: rgba(222, 197, 61, 1);
-}
-
-.homePageNav:hover {
-    background-color: rgba(45, 46, 50, 1);
-}
 
 #admin-tour-list,
 #edit-tour-places {
@@ -463,6 +438,9 @@ header {
     --footer-border-color: #e7e7e7;
 }
 
+/* ----------------------------------------------------------------- */
+
+/* footer----------------------------------------------------------- */
 
 .footer-centered {
     background-color: var(--footer-bg);
@@ -533,6 +511,8 @@ header {
     margin: 0;
 }
 
+/* ----------------------------------------------------------------- */
+
 /* admin header----------------------------------------------------------------- */
 .admintopnav {
     display: flex;
@@ -567,11 +547,11 @@ header {
 }
 
 .dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #f9f9f9;
-  min-width: 200px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 200px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
 }
 
 .dropdown-content a {
@@ -583,40 +563,41 @@ header {
 }
 
 .dropdown-content a:hover {
-  background-color: white;
-    color:rgba(63, 143, 135, 1);
+    background-color: white;
+    color: rgba(63, 143, 135, 1);
 }
 
 .dropdown:hover .dropdown-content {
-  display: block;
+    display: block;
 }
 
 .dropbtn {
-  background-color: rgba(63, 143, 135, 1);
-  color: white;
-  padding: 16px;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
+    background-color: dropdown;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
 }
 
-.dropdown:hover .dropbtn{
+.dropdown:hover .dropbtn {
     color: rgba(63, 143, 135, 1);
     background-color: white !important;
 }
 
 ul li a {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
 }
 
 ul li a:hover {
-  background-color: white;
+    background-color: white;
     color: rgba(63, 143, 135, 1) !important;
 }
+
 /* ----------------------------------------------------------------- */
 
 /*admin home --------------------------------------------------------*/
@@ -624,53 +605,72 @@ ul li a:hover {
     background-color: rgb(238 213 87) !important;
     transition: background-color 0.3s ease;
 }
+
+/* ----------------------------------------------------------------- */
+
+/*visitor home ------------------------------------------------------*/
+
+.homeContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 50vh;
+}
+
+.btn:hover {
+    background-color: rgb(238 213 87) !important;
+    transition: background-color 0.3s ease;
+}
+
 /* ----------------------------------------------------------------- */
 
 /* welcome message & add events------------------------------------- */
 .input-container {
-  position: relative;
-  margin: 20px;
+    position: relative;
+    margin: 20px;
 }
 
-.input-field {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  border: none;
-  border-bottom: 2px solid #ccc;
-  outline: none;
-  background-color: transparent;
+.feedbackinput {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    outline: none;
+    background-color: transparent;
 }
 
 .input-label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  font-size: 20px;
-  color: rgb(204, 204, 204);
-  pointer-events: none;
-  transition: all 0.2s ease;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 20px;
+    color: rgb(204, 204, 204);
+    pointer-events: none;
+    transition: all 0.2s ease;
 }
 
 .input-highlight {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 2px;
-  width: 0;
-  background-color: #000000;
-  transition: all 0.3s ease;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 0;
+    background-color: #000000;
+    transition: all 0.3s ease;
 }
 
-.input-field:focus + .input-label {
-  top: -20px;
-  font-size: 12px;
-  color: grey;
+.feedbackinput:focus + .input-label {
+    top: -20px;
+    font-size: 12px;
+    color: grey;
 }
 
 .input-field:focus + .input-label + .input-highlight {
-  width: 100%;
+    width: 100%;
 }
 
 .input-field:focus + .input-label,
@@ -683,6 +683,191 @@ ul li a:hover {
 .input-field:focus + .input-label + .input-highlight,
 .input-field:not(:placeholder-shown) + .input-label + .input-highlight {
     width: 100%;
+}
+
+/* ----------------------------------------------------------------- */
+
+/* visitor feedback------------------------------------------------ */
+.feedback-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 60vh;
+    justify-content: center;
+}
+
+.wrapper {
+    display: block;
+    position: static;
+    margin: 40px auto;
+    max-width: 350px;
+    width: 100%;
+    background: #fff;
+    padding: 25px;
+    border-radius: 5px;
+}
+
+.wrapper h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #332902;
+}
+
+.wrapper .input_field {
+    margin-bottom: 10px;
+}
+
+.wrapper .input_field input[type="text"],
+.wrapper textarea {
+    border: 1px red;
+    border-radius: 5px;
+    width: 100%;
+    padding: 10px;
+}
+
+.wrapper textarea {
+    resize: none;
+    height: 80px;
+}
+
+
+
+footer {
+    margin-top: auto;
+}
+
+/* ----------------------------------------------------------------- */
+
+/* tours & locations lists-------------------------------------------------------- */
+.dropdown-menu .dropdown-item {
+    color: rgba(63, 143, 135, 1) !important;
+}
+
+ol.gradient-list {
+    counter-reset: gradient-counter;
+    list-style: none;
+    margin: 1.75rem 0;
+    padding-left: 1rem;
+}
+
+ol.gradient-list > li.tour-item {
+    background: white;
+    border-radius: 0 0.5rem 0.5rem 0.5rem;
+    box-shadow: 0.25rem 0.25rem 0.6rem rgba(0, 0, 0, 0.05), 0 0.5rem 1.125rem rgba(75, 0, 0, 0.05);
+    counter-increment: gradient-counter;
+    margin-top: 1rem;
+    min-height: 3rem;
+    padding: 1rem 1rem 1rem 3rem;
+    position: relative;
+}
+
+ol.gradient-list > li.tour-item + li.tour-item {
+    margin-top: 2rem;
+}
+
+ol.gradient-list > li.tour-item a {
+    color: #1d1f20;
+    font: 900 1.1em/1 'Montserrat', sans-serif;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+ol.gradient-list > li.tour-item a:hover {
+    text-decoration: underline;
+}
+
+ol.gradient-list > li.tour-item p {
+    margin: 0 0 0.5rem;
+    font-size: 0.9em;
+    color: #555;
+}
+
+ol.gradient-list > li.tour-item span {
+    font-size: 0.85em;
+    color: #fddc32;
+}
+
+ol.gradient-list > li.tour-item::before,
+ol.gradient-list > li.tour-item::after {
+    background: linear-gradient(135deg, #83e4e2 0%, #a2ed56 100%);
+    border-radius: 1rem 1rem 0 1rem;
+    content: '';
+    height: 3rem;
+    left: -1rem;
+    overflow: hidden;
+    position: absolute;
+    top: -1rem;
+    width: 3rem;
+}
+
+ol.gradient-list > li.tour-item::before {
+    align-items: flex-end;
+    box-shadow: 0.25rem 0.25rem 0.6rem rgba(0, 0, 0, 0.05), 0 0.5rem 1.125rem rgba(75, 0, 0, 0.05);
+    content: counter(gradient-counter);
+    color: #1d1f20;
+    display: flex;
+    font: 900 1.5em/1 'Montserrat', sans-serif;
+    justify-content: flex-end;
+    padding: 0.125em 0.25em;
+    z-index: 1;
+}
+
+ol.gradient-list > li.tour-item:nth-child(10n+1)::before {
+    background: linear-gradient(135deg, rgba(162, 237, 86, 0.2) 0%, rgba(253, 220, 50, 0.2) 100%);
+}
+
+ol.gradient-list > li.tour-item:nth-child(10n+2)::before {
+    background: linear-gradient(135deg, rgba(162, 237, 86, 0.4) 0%, rgba(253, 220, 50, 0.4) 100%);
+}
+
+ol.gradient-list > li.tour-item:nth-child(10n+3)::before {
+    background: linear-gradient(135deg, rgba(162, 237, 86, 0.6) 0%, rgba(253, 220, 50, 0.6) 100%);
+}
+
+ol.gradient-list > li.tour-item:nth-child(10n+4)::before {
+    background: linear-gradient(135deg, rgba(162, 237, 86, 0.8) 0%, rgba(253, 220, 50, 0.8) 100%);
+}
+
+ol.gradient-list > li.tour-item:nth-child(10n+5)::before {
+    background: linear-gradient(135deg, rgba(162, 237, 86, 1.0) 0%, rgba(253, 220, 50, 1.0) 100%);
+}
+
+ol.gradient-list > li.tour-item:nth-child(10n+6)::before {
+    background: linear-gradient(135deg, rgba(162, 237, 86, 0.8) 0%, rgba(253, 220, 50, 0.8) 100%);
+}
+
+ol.gradient-list > li.tour-item:nth-child(10n+7)::before {
+    background: linear-gradient(135deg, rgba(162, 237, 86, 0.6) 0%, rgba(253, 220, 50, 0.6) 100%);
+}
+
+ol.gradient-list > li.tour-item:nth-child(10n+8)::before {
+    background: linear-gradient(135deg, rgba(162, 237, 86, 0.4) 0%, rgba(253, 220, 50, 0.4) 100%);
+}
+
+ol.gradient-list > li.tour-item:nth-child(10n+9)::before {
+    background: linear-gradient(135deg, rgba(162, 237, 86, 0.2) 0%, rgba(253, 220, 50, 0.2) 100%);
+}
+
+ol.gradient-list > li.tour-item:nth-child(10n+10)::before {
+    background: linear-gradient(135deg, rgba(162, 237, 86, 0.0) 0%, rgba(253, 220, 50, 0.0) 100%);
+}
+
+.dropdown-menu li,
+.dropdown-menu a,
+.dropdown-menu li::before,
+.dropdown-menu li::after {
+    content: none !important;
+    display: revert !important;
+    background: none !important;
+    counter-increment: none !important;
+    list-style: none !important;
+    position: static !important;
+    box-shadow: none !important;
+    height: auto !important;
+    width: auto !important;
 }
 
 /* ----------------------------------------------------------------- */

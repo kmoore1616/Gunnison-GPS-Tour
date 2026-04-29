@@ -46,21 +46,36 @@
 
 <br><br>
 
-<h2>Add Event</h2>
+<h2>Add Event</h2><br>
 <form method="POST" action="/addevent">
 
-    <div class="input-container">
-        <input type="text" name="title" class="input-field" placeholder=" " required>
-        <label class="input-label">Event Name</label>
-        <span class="input-highlight"></span>
-    </div>
-    <br>
+    <div class="input-container" style="border: none; padding: 0; margin: 0;">
+        <label class="input-label" style="position: relative; top: -10px; left: 0; color: #666;">Event Name</label><br>
+    <input
+        type="text"
+        name="title"
+        class="input-field"
+        placeholder=" "
+        required
+        style="border: none; border-bottom: 1px solid #000; background: transparent; padding: 5px 0; margin: 0; outline: none; width: 35%;"
+    >
 
-    <div class="input-container">
-        <input type="text" name="message" class="input-field" placeholder=" " required>
-        <label class="input-label">Event Info</label>
-        <span class="input-highlight"></span>
-    </div>
+    <span class="input-highlight" style="display: none;"></span>
+</div>
+<br>
+<label class="input-label" style="position: relative; top: -10px; left: 0; color: #666;">Event Info</label><br>
+<div class="input-container" style="border: none; padding: 0; margin: 0;">
+    <input
+        type="text"
+        name="message"
+        class="input-field"
+        placeholder=" "
+        required
+        style="border: none; border-bottom: 1px solid #000; background: transparent; padding: 5px 0; margin: 0; outline: none; width: 35%;"
+    >
+    <span class="input-highlight" style="display: none;"></span>
+</div>
+
     <br>
 
     <input type="radio" id="public" name="is_public" value="public">

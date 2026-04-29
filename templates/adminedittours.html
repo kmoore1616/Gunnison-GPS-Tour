@@ -2,23 +2,42 @@
 {% block title %} Tours {% endblock %}
 {% block content %}
 <body id="home">
-    <h1>Tours</h1>
-    <table id="admin-tour-list">
-        <tr id="admin-tour-headers">
-            <th>TOUR</th>
-            <th>LENGTH</th>
-            <th>RATING</th>
-        </tr>
-        <tr class="admin-tour-items">
-            <td colspan="3"><a href="/createTour">Create New Tour</a></td>
-        </tr>
-        {% for t in tours %}
-            <tr class="admin-tour-items">
-                <td><a href="/editTour/{{t.id}}">{{ t.name }}</a></td>
+<div class="row">
+  <div class="col-12 mb-3 mb-lg-5">
+    <div class="overflow-hidden card table-nowrap table-card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Your Tours</h5>
+        <a href="/createTour" class="btn btn-sm btn-primary">Create New Tour</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead class="small text-uppercase bg-body text-muted">
+            <tr>
+              <th>Tour Name</th>
+              <th>Length</th>
+              <th>Rating</th>
+                <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in tours %}
+              <tr class="align-middle">
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="h6 mb-0 lh-1">{{ t.name }}</div>
+                  </div>
+                </td>
                 <td>{{ t.estimated_completion_time }} Minutes</td>
                 <td>{{ t.average_rating }} Stars</td>
-            </tr>
-        {% endfor %}
-    </table>
+              <td><div class="h6 mb-0 lh-1"><a href="/editTour/{{ t.id }}">Edit</a></div></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 {% endblock %}
+
