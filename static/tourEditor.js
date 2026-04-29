@@ -59,7 +59,7 @@ function getStops(name) {
                 upButton.classList.add(p_ids[s].toString());
                 upButton.type = "button";
                 upButton.setAttribute("onclick", "movePlaceUp(this)");
-                upButton.innerHTML = "Move Up";
+                upButton.innerHTML = "↑";
                 td2.appendChild(upButton);
 
                 var td3 = document.createElement('td');
@@ -69,7 +69,7 @@ function getStops(name) {
                 downButton.classList.add(p_ids[s].toString());
                 downButton.type = "button";
                 downButton.setAttribute("onclick", "movePlaceDown(this)");
-                downButton.innerHTML = "Move Down";
+                downButton.innerHTML = "↓";
                 td3.appendChild(downButton);
 
                 var td4 = document.createElement('td');
