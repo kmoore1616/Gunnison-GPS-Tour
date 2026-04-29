@@ -25,14 +25,7 @@
                 <tr id="add-stop-button">
                     <td colspan="4">Add Stop</td>
                 </tr>
-                {% for p in tour.places %}
-                    <tr class="edit-tour-items">
-                        <td>{{p.name}}</td>
-                        <td><button class="{{p.id}}" type="button" onclick="movePlaceUp(this)">↑</button></td>
-                        <td><button class="{{p.id}}" type="button" onclick="movePlaceDown(this)">↓</button></td>
-                        <td><button class="{{p.id}}" type="button" onclick="removeStop(this)">Remove Stop</button></td>
-                    </tr>
-                {% endfor %}
+                
             </table>
 
             <input type="submit" value="SAVE"><br>
