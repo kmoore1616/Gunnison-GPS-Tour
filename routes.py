@@ -12,13 +12,38 @@ from sqlalchemy import text
 
 from model import Admin, Tour, Feedback, db, Review, tour_places, Place, Event
 from mail import send_feedback_email
-from map import get_ordered_places_for_tour
+from map import format_duration, get_ordered_places_for_tour, get_tour_duration_estimate
 
 import os
 
 
 def json_answer(texts):
     return jsonify({"texts": texts})
+
+
+def get_tour_time_estimate(tour):
+    estimate = get_tour_duration_estimate(tour.id)
+
+    if estimate["totalDurationSeconds"] > 0:
+        return {
+            "text": estimate["totalDurationText"],
+            "minutes": estimate["estimatedCompletionMinutes"],
+        }
+
+    if tour.estimated_completion_time:
+        return {
+            "text": format_duration(tour.estimated_completion_time * 60),
+            "minutes": tour.estimated_completion_time,
+        }
+
+    return {
+        "text": "0 min",
+        "minutes": 0,
+    }
+
+
+def get_tour_time_display(tour):
+    return get_tour_time_estimate(tour)["text"]
 
 
 def register_routes(app):
@@ -39,9 +64,9 @@ def register_routes(app):
         sort_tour = request.args.get("sort_tour","none")
 
         if sort_tour == "longest":
-            entries = Tour.query.filter(Tour.is_public=="on").order_by(Tour.estimated_completion_time.desc()).all()
+            entries = Tour.query.filter(Tour.is_public=="on").all()
         elif sort_tour == "shortest":
-            entries = Tour.query.filter(Tour.is_public=="on").order_by(Tour.estimated_completion_time.asc()).all()
+            entries = Tour.query.filter(Tour.is_public=="on").all()
         elif sort_tour == "highreview":
             entries = Tour.query.filter(Tour.is_public=="on").join(Review).group_by(Tour.id).order_by(func.avg(Review.rating).desc()).all()
         elif sort_tour == "lowreview":
@@ -55,7 +80,14 @@ def register_routes(app):
 
         for entry in entries:
             avg_rating = db.session.query(func.avg(Review.rating)).filter_by(tour_id=entry.id).scalar()
-            col.append([entry.id, entry.name, entry.description,avg_rating or "Be the first to review it"])
+            estimate = get_tour_time_estimate(entry)
+            col.append([entry.id, entry.name, entry.description,avg_rating or "Be the first to review it", estimate["text"], estimate["minutes"]])
+
+        if sort_tour == "longest":
+            col.sort(key=lambda tour: tour[5], reverse=True)
+        elif sort_tour == "shortest":
+            col.sort(key=lambda tour: tour[5])
+
         return render_template("tour_list.html", col=col)
 
     @app.route("/Locations")
@@ -126,7 +158,7 @@ def register_routes(app):
             tour_id=tour_id,
             tour=currtour.name,
             rating=currtour.average_rating,
-            time=currtour.estimated_completion_time,
+            time=get_tour_time_display(currtour),
             description=currtour.description,
             col=col
         )
@@ -155,9 +187,11 @@ def register_routes(app):
     @login_required
     def edittours():
         tours = Tour.query.all()
+        tour_times = {tour.id: get_tour_time_display(tour) for tour in tours}
         return render_template(
             "adminedittours.html",
-            tours=tours
+            tours=tours,
+            tour_times=tour_times
         )
 
     @app.route("/createTour")
@@ -180,7 +214,8 @@ def register_routes(app):
 
         return render_template(
             "admineditTour.html",
-            tour=currtour
+            tour=currtour,
+            estimated_time=get_tour_time_display(currtour)
         )
 
     @app.route("/editTour/<tour_id>")
@@ -190,6 +225,7 @@ def register_routes(app):
         return render_template(
             "admineditTour.html",
             tour=currtour,
+            estimated_time=get_tour_time_display(currtour),
             error="none"
         )
 
@@ -930,4 +966,3 @@ def register_routes(app):
             return render_template('adminerror.html', err=403)
         else:
             return render_template('errorPage.html', err=403)
-

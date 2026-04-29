@@ -5,7 +5,7 @@
 <body id="tourEditor">
     <h1 id="editTourName">{{ tour.name }}</h1>
     <h3>Tour Rating: {{ tour.average_rating }} Stars</h3>
-    <h3>Estimated Length: {{ tour.estimated_completion_time }} Minutes</h3>
+    <h3>Estimated Length: {{ estimated_time }}</h3>
     <form action="/saveTour/{{tour.id}}" method="POST">
         <fieldset>
 
