@@ -6,14 +6,14 @@
     <form method="POST" action="/addmessage">
 
         <div class="input-container" style="border: none; padding: 0; margin: 0;">
-            <input
-                    type="text"
+            <textarea
                     name="message"
                     class="input-field"
                     placeholder=" "
-                    value="{{ welcome.message if welcome else '' }}"
                     style="border: none; border-bottom: 1px solid #000; background: transparent; padding: 5px 0; margin: 0; outline: none; width: 35%;"
-            >
+                    maxlength="10000"
+                    rows="8" cols="50"
+            >{{ welcome.message }}</textarea>
             <span class="input-highlight" style="display: none;"></span>
         </div>
 

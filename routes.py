@@ -825,14 +825,39 @@ def register_routes(app):
     @app.route("/admineditwelcome")
     @login_required
     def editwelcome():
-        welcome = Welcome.query.first()
-        return render_template("admineditwelcome.html", welcome=welcome)
+        welcome = Event.query.filter_by(title="Welcome").first()
+        if welcome:
+            return render_template("admineditwelcome.html", welcome=welcome)
+        else:
+            message = ("Welcome to the Gunnison GPS Walking Tours experience! "
+                       "Discover the history, culture, and hidden gems of downtown "
+                       "Gunnison through interactive, self-guided tours. Use your "
+                       "phone to follow curated routes, learn about local landmarks, "
+                       "and explore at your own pace. Start your adventure and "
+                       "experience Gunnison like never before.")
+            title = "Welcome"
+            is_public = True
+            welcome = Event(title=title, message=message, is_public=is_public)
+            db.session.add(welcome)
+            db.session.commit()
+            return render_template("admineditwelcome.html", welcome=welcome)
 
     @app.route("/addmessage", methods=["POST"])
     @login_required
     def add_message():
-        #add database stuff
-        return redirect("/editwelcome")
+        message = request.form["message"]
+        welcome = Event.query.filter_by(title="Welcome").first()
+        if welcome and message:
+            if message == "":
+                message = ("Welcome to the Gunnison GPS Walking Tours experience! "
+                       "Discover the history, culture, and hidden gems of downtown "
+                       "Gunnison through interactive, self-guided tours. Use your "
+                       "phone to follow curated routes, learn about local landmarks, "
+                       "and explore at your own pace. Start your adventure and "
+                       "experience Gunnison like never before.")
+            welcome.message = message
+            db.session.commit()
+        return redirect("/admineditevent")
 
 #edit events
     @app.route("/admineditevent")
