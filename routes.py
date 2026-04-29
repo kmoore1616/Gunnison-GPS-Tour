@@ -326,6 +326,9 @@ def register_routes(app):
                         ),
                         {"currtour_id": currtour.id, "target_num": target_place["stop_num"]}
                     )
+                else:
+                    temp_place = Place.query.filter_by(id=target_place["place_id"]).first()
+                    currtour.places.remove(temp_place)
                 db.session.commit()
                 return json_response(result=0)
             elif count == 1:
