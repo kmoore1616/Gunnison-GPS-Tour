@@ -29,9 +29,8 @@ def register_routes(app):
         image_folder = os.path.join(app.static_folder, 'photos')
         images = os.listdir(image_folder)
 
-        col = Welcome.query.all()
         event = Event.query.where(Event.is_public == 1).all()
-        return render_template("home.html", col=col, event=event, images=images)
+        return render_template("home.html", event=event, images=images)
 
     @app.route("/Tours")
     def see_tours():
@@ -215,7 +214,7 @@ def register_routes(app):
 
             db.session.commit()
 
-            return redirect("/edittours")
+            return redirect("/adminedittours")
 
     @app.route("/api/edit_place_on_tour", methods=['POST'])
     @login_required
@@ -852,7 +851,7 @@ def register_routes(app):
             new_event = Event(title=title, message=message, is_public=is_public)
             db.session.add(new_event)
             db.session.commit()
-        return redirect("/editevent")
+        return redirect("/admineditevent")
 
     @app.route("/updateevent", methods=["POST"])
     @login_required
@@ -862,7 +861,7 @@ def register_routes(app):
             is_public = request.form.get(f"is_public_{i.id}")
             i.is_public = 1 if is_public == "1" else 0
         db.session.commit()
-        return redirect("/editevent")
+        return redirect("/admineditevent")
 
     @app.route('/deleteevent/<int:id>', methods=['POST'])
     @login_required
