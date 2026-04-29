@@ -569,47 +569,57 @@ def register_routes(app):
             elif name != "":
                 if address != "":
                     if description != "":
-                        # Conversion from address to coordinates is done via Geocoding
-                        # Google Maps Geocoding API: https://developers.google.com/maps/documentation/geocoding/guides-v3/requests-geocoding
-                        parsed_address = address.split(" ")
-                        url_address = ""
-                        i = 0
-                        for a in parsed_address:
-                            if i == 0:
-                                url_address = url_address + a
-                            else:
-                                url_address = url_address + "%20" + a
-                            i += 1
-                        #Western Colorado University, 1 Western Way, Gunnison, CO 81231
-                        api_key = current_app.config.get("GOOGLE_MAPS_API_KEY")
-                        api_url = ("https://maps.googleapis.com/maps/api/geocode/json?address="
-                                   + url_address
-                                   + "&key="
-                                   + api_key)
-                        response = requests.post(api_url)
-
-                        if not response.ok:
-                            print("Error connecting to geolocation api")
-                            print("STATUS:", response.status_code)
-                            print("TEXT:", response.text)
-                            return render_template("admineditTour.html", tour=currtour, error="geolocation_error")
-
                         try:
-                            location_info = response.json()
-                        except Exception:
-                            return render_template("admineditTour.html", tour=currtour, error="json_error")
+                            parsed_address = address.split(", ")
+                            coords = []
+                            for a in parsed_address:
+                                coord = float(a)
+                                coords.append(a)
+                            lat = coords[0]
+                            lng = coords[1]
+                        except ValueError:
+                            # Conversion from address to coordinates is done via Geocoding
+                            # Google Maps Geocoding API: https://developers.google.com/maps/documentation/geocoding/guides-v3/requests-geocoding
+                            url_address = ""
+                            parsed_address = address.split(" ")
 
-                        try:
-                            results = location_info.get("results")
-                            address_components = results[0] # error when bad address
-                            geometry = address_components.get("geometry")
-                            coords = geometry.get("location")
-                        except Exception:
-                            print("Invalid address")
-                            return render_template("admineditTour.html", tour=currtour, error="invalid_address")
+                            i = 0
+                            for a in parsed_address:
+                                if i == 0:
+                                    url_address = url_address + a
+                                else:
+                                    url_address = url_address + "%20" + a
+                                i += 1
 
-                        lat = coords.get("lat")
-                        lng = coords.get("lng")
+                            api_key = current_app.config.get("GOOGLE_MAPS_API_KEY")
+                            api_url = ("https://maps.googleapis.com/maps/api/geocode/json?address="
+                                       + url_address
+                                       + "&key="
+                                       + api_key)
+                            response = requests.post(api_url)
+
+                            if not response.ok:
+                                print("Error connecting to geolocation api")
+                                print("STATUS:", response.status_code)
+                                print("TEXT:", response.text)
+                                return render_template("admineditTour.html", tour=currtour, error="geolocation_error")
+
+                            try:
+                                location_info = response.json()
+                            except Exception:
+                                return render_template("admineditTour.html", tour=currtour, error="json_error")
+
+                            try:
+                                results = location_info.get("results")
+                                address_components = results[0] # error when bad address
+                                geometry = address_components.get("geometry")
+                                coords = geometry.get("location")
+                            except Exception:
+                                print("Invalid address")
+                                return render_template("admineditTour.html", tour=currtour, error="invalid_address")
+
+                            lat = coords.get("lat")
+                            lng = coords.get("lng")
 
                         new_place = Place(name=name, description=description, longitude=str(lng), latitude=str(lat))
                         db.session.add(new_place)
