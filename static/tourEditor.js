@@ -259,7 +259,7 @@ function deleteTour() {
                 if(json.result == 0) {
                     console.log("Successfully deleted!");
                 }
-                window.location.href = "/edittours";
+                window.location.href = "/adminedittours";
             }
         };
         xhttp.open('POST', '/api/delete_tour', true);
