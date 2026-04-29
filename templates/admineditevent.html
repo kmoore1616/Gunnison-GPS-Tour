@@ -16,7 +16,7 @@
         <tr>
             <th>Event Name</th>
             <th>Description</th>
-            <th>Status</th>
+            <th style="width: 120px;">Status</th>
         </tr>
         </thead>
         <tbody>
@@ -26,7 +26,7 @@
             <td>{{ i.message }}</td>
             <td>
                 <input type="radio" id="public_{{ i.id }}" name="is_public_{{ i.id }}" value="1" {% if i.is_public == 1 %}checked{% endif %}>
-                <label for="public_{{ i.id }}">Public</label>
+                <label for="public_{{ i.id }}">Public</label><br>
                 <input type="radio" id="not_public_{{ i.id }}" name="is_public_{{ i.id }}" value="0" {% if i.is_public == 0 %}checked{% endif %}>
                 <label for="not_public_{{ i.id }}">Not Public</label>
             </td>
