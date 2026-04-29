@@ -27,7 +27,7 @@
                     <div class="h6 mb-0 lh-1">{{ t.name }}</div>
                   </div>
                 </td>
-                <td>{{ t.estimated_completion_time }} Minutes</td>
+                <td>{{ tour_times[t.id] }}</td>
                 <td>{{ t.average_rating }} Stars</td>
               <td><div class="h6 mb-0 lh-1"><a href="/editTour/{{ t.id }}">Edit</a></div></td>
               </tr>
@@ -40,4 +40,3 @@
 </div>
 </body>
 {% endblock %}
-
