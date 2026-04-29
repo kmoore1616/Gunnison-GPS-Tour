@@ -5,30 +5,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {openPopup} from './popup.js'
-import {mapElement, tourMapReady} from './tourMap.js'
+// Takes shared features from view tour and adds navigation and other onTour specific functionality
+
+import {openPopup, openStopPopup} from './popup.js'
+import {hideCompletedTourParts, mapElement, tourMapReady, updateNextStopMarker} from './tourMap.js'
 
 let id;
 let target;
 let coords;
 let globalMap;
 let route = [];
+let stops = [];
 let userMarkers = [];
 let userRoutes = [];
 let testVar = 0;
-let i = 1;
-let current_stop = 0;
+let currentStopIndex = 0;
 let latestUserPosition;
 let recenterButton;
+let imHereButton;
 
-const tour_id = document.getElementById("tour-id").value;
+const tour_id = document.getElementById("tour-id").textContent.trim();
+let stop_name = document.getElementById("next-stop-name")
 
+
+// Gps Options
 const options = {
-    enableHighAccuracy: false,
+    enableHighAccuracy: true,
     timeout: 5000,
     maximumAge: 0,
 };
 
+// Sets up marker for user position
 function createCurrentLocationMarkerContent() {
     const markerContent = document.createElement("div");
     markerContent.style.width = "0";
@@ -43,11 +50,12 @@ function createCurrentLocationMarkerContent() {
     return markerContent;
 }
 
+// Attaches functionality to tour buttons
 function setupTourButtons() {
     let skip_element = document.getElementById("skipButton")
-    let
-        end_element = document.getElementById("endButton")
+    let end_element = document.getElementById("endButton")
     recenterButton = document.getElementById("recenterButton")
+    imHereButton = document.getElementById("imHereButton")
 
     if (skip_element != null){
         skip_element.addEventListener("click", skipStop);
@@ -60,20 +68,25 @@ function setupTourButtons() {
     if (recenterButton != null){
         recenterButton.addEventListener("click", recenterOnUser);
     }
+
+    if (imHereButton != null){
+        imHereButton.addEventListener("click", showCurrentStopPopup);
+    }
 }
 
+// Only show recenter if user pans
 function showRecenterButton() {
     if (recenterButton != null && latestUserPosition != null) {
         recenterButton.hidden = false;
     }
 }
-
+// Note, recent button will now always be visible
 function hideRecenterButton() {
     if (recenterButton != null) {
-        recenterButton.hidden = true;
+        // recenterButton.hidden = true;
     }
 }
-
+// Recenter button functionality
 function recenterOnUser() {
     if (latestUserPosition == null) {
         return;
@@ -81,6 +94,48 @@ function recenterOnUser() {
 
     globalMap.panTo(latestUserPosition);
     hideRecenterButton();
+}
+
+function showCurrentStopPopup() {
+    const currentStop = stops[currentStopIndex];
+
+    if (currentStop == null) {
+        return;
+    }
+
+    openStopPopup(currentStop.name, currentStop.description, advanceToNextStop);
+}
+
+// Sets the next navigation target (the next stop on the tour)
+function setTargetToStop(stopIndex) {
+    const stop = stops[stopIndex];
+    target = { lat: stop.lat, lng: stop.lng };
+}
+
+// redraw if user latest position updates (keeps tracking user)
+function routeUserToCurrentTarget() {
+    if (latestUserPosition == null) {
+        return;
+    }
+
+    createRoute(latestUserPosition.lat, latestUserPosition.lng);
+}
+
+function advanceToNextStop() {
+    hideCompletedTourParts(currentStopIndex);
+
+    if (currentStopIndex >= stops.length - 1) {
+        navigator.geolocation.clearWatch(id);
+        endTour();
+        return false;
+    }
+
+    currentStopIndex = currentStopIndex + 1;
+    setTargetToStop(currentStopIndex);
+    updateNextStopMarker(currentStopIndex);
+    routeUserToCurrentTarget();
+    stop_name.innerHTML = "Next Stop: " + stops[currentStopIndex].name;
+    return true;
 }
 
 // Draw the marker for the user's current location
@@ -156,13 +211,7 @@ async function success(pos) {
 
     if (target.lat === crd.latitude && target.lng === crd.longitude) {
         console.log("Congratulations, you reached the target");
-        const nextSegment = coords[i];
-        const nextDestination = nextSegment.destination;
-        target = { lat: nextDestination.lat, lng: nextDestination.lng };
-        i = i+1;
-        if (i == coords.length) {
-            navigator.geolocation.clearWatch(id);
-        }
+        advanceToNextStop();
     }
 }
 
@@ -170,18 +219,16 @@ function error(err) {
     console.error(`ERROR(${err.code}): ${err.message}`);
 }
 
-export function endTour(tour_id) {
+export function endTour() {
     openPopup(tour_id);
 
 }
 
 export function skipStop() {
-    current_stop++;
-    if(current_stop > route.length - 1) {
-       endTour()
-    }else {
-        let latlng = {lat: route[current_stop][0], lng: route[current_stop][1]};
-        globalMap.panTo(latlng);
+    const advanced = advanceToNextStop();
+
+    if (advanced) {
+        globalMap.panTo(target);
     }
 }
 
@@ -191,7 +238,17 @@ async function initTourNavigation() {
     coords = tourMap.coords;
     globalMap = tourMap.map;
     route = tourMap.route;
+    stops = tourMap.stops;
     target = tourMap.target;
+
+    stop_name.innerHTML = "Next Stop: " + stops[0].name;
+
+    if (stops.length === 0) {
+        return;
+    }
+
+    setTargetToStop(currentStopIndex);
+    updateNextStopMarker(currentStopIndex);
 
     setupTourButtons();
     globalMap.addListener("dragstart", showRecenterButton);

@@ -1,8 +1,8 @@
 {% extends "adminnav.html" %}
 {% block title %} Tours {% endblock %}
 {% block content %}
+<script src="/static/tourEditor.js"></script>
 <body id="tourEditor">
-    <script src="/static/tourEditor.js"></script>
     <h1 id="editTourName">{{ tour.name }}</h1>
     <h3>Tour Rating: {{ tour.average_rating }} Stars</h3>
     <h3>Estimated Length: {{ tour.estimated_completion_time }} Minutes</h3>
@@ -16,19 +16,19 @@
             <label for="is_public">Public</label><br><br>
 
             <label>Tour Description:</label><br>
-            <textarea id="tour-description" name="description" maxlength="1000" rows="10" cols="50">{{tour.description}}</textarea>
+            <textarea id="tour-description" name="description" maxlength="1000" rows="10" cols="50" required>{{tour.description}}</textarea>
 
             <table id="edit-tour-places">
                 <tr id="edit-tour-headers">
-                    <th colspan="4">Tour Stops</th>
+                    <th colspan="5">Tour Stops</th>
                 </tr>
                 <tr id="add-stop-button">
-                    <td colspan="4">Add Stop</td>
+                    <td colspan="5"><button type="button" onclick="addStop('{{tour.name}}')">Add Stop</button></td>
                 </tr>
-                
             </table>
 
-            <input type="submit" value="SAVE"><br>
+            <input type="hidden" id="admin_error_code" value="{{error}}">
+            <input type="submit" value="SAVE">
         </fieldset>
     </form>
     <button id="delete-tour-button" type="button" onclick="deleteTour()">DELETE TOUR</button>
