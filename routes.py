@@ -22,14 +22,6 @@ def json_answer(texts):
 
 
 def get_tour_time_estimate(tour):
-    estimate = get_tour_duration_estimate(tour.id)
-
-    if estimate["totalDurationSeconds"] > 0:
-        return {
-            "text": estimate["totalDurationText"],
-            "minutes": estimate["estimatedCompletionMinutes"],
-        }
-
     if tour.estimated_completion_time:
         return {
             "text": format_duration(tour.estimated_completion_time * 60),
@@ -44,6 +36,19 @@ def get_tour_time_estimate(tour):
 
 def get_tour_time_display(tour):
     return get_tour_time_estimate(tour)["text"]
+
+
+def update_tour_time_estimate(tour):
+    places = get_ordered_places_for_tour(tour.id)
+
+    if len(places) < 2:
+        tour.estimated_completion_time = 0
+        return
+
+    estimate = get_tour_duration_estimate(tour.id)
+
+    if estimate["totalDurationSeconds"] > 0:
+        tour.estimated_completion_time = estimate["estimatedCompletionMinutes"]
 
 
 def register_routes(app):
@@ -64,9 +69,9 @@ def register_routes(app):
         sort_tour = request.args.get("sort_tour","none")
 
         if sort_tour == "longest":
-            entries = Tour.query.filter(Tour.is_public=="on").all()
+            entries = Tour.query.filter(Tour.is_public=="on").order_by(Tour.estimated_completion_time.desc()).all()
         elif sort_tour == "shortest":
-            entries = Tour.query.filter(Tour.is_public=="on").all()
+            entries = Tour.query.filter(Tour.is_public=="on").order_by(Tour.estimated_completion_time.asc()).all()
         elif sort_tour == "highreview":
             entries = Tour.query.filter(Tour.is_public=="on").join(Review).group_by(Tour.id).order_by(func.avg(Review.rating).desc()).all()
         elif sort_tour == "lowreview":
@@ -82,11 +87,6 @@ def register_routes(app):
             avg_rating = db.session.query(func.avg(Review.rating)).filter_by(tour_id=entry.id).scalar()
             estimate = get_tour_time_estimate(entry)
             col.append([entry.id, entry.name, entry.description,avg_rating or "Be the first to review it", estimate["text"], estimate["minutes"]])
-
-        if sort_tour == "longest":
-            col.sort(key=lambda tour: tour[5], reverse=True)
-        elif sort_tour == "shortest":
-            col.sort(key=lambda tour: tour[5])
 
         return render_template("tour_list.html", col=col)
 
@@ -247,6 +247,8 @@ def register_routes(app):
                 currtour.description = description
             if is_public != currtour.is_public:
                 currtour.is_public = is_public
+
+            update_tour_time_estimate(currtour)
 
             db.session.commit()
 
