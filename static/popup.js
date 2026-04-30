@@ -16,6 +16,7 @@ export function openPopup(tour_id) {
       const stars = document.getElementsByClassName("star");
 
       document.getElementById('closePopup').addEventListener('click', closePopup);
+      rate(4, stars);
 
       document.querySelectorAll('.star').forEach((star, index) => {
         star.addEventListener('click', () => rate(index + 1, stars));

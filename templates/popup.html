@@ -3,14 +3,14 @@
         <h2>You've reached the end of the tour!<br>Let us know how it went</h2>
 
         <form class="form-container" action="/tourfeedback" method="POST" name="rating">
-            <div class="star-container d-flex">
-                <span class="star">★</span>
-                <span class="star">★</span>
-                <span class="star">★</span>
-                <span class="star">★</span>
+            <div class="star-container">
+                <span class="star four">★</span>
+                <span class="star four">★</span>
+                <span class="star four">★</span>
+                <span class="star four">★</span>
                 <span class="star">★</span>
             </div>
-            <input type="hidden" id="ratingValue" name="rating" value="0" required>
+            <input type="hidden" id="ratingValue" name="rating" value="4" required>
             <input class="form-input" type="text" placeholder="Share your ideas..." id="tourfeedback" name="comment"
                    required>
             <button class="btn-submit" type="submit">Submit</button>
