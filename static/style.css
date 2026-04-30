@@ -57,6 +57,7 @@ span{
 .overlay-container {
     display: none;
     position: fixed;
+    z-index: 20;
     top: 0;
     left: 0;
     width: 100%;
@@ -857,6 +858,129 @@ ol.gradient-list > li.tour-item:nth-child(10n+9)::before {
 
 ol.gradient-list > li.tour-item:nth-child(10n+10)::before {
     background: linear-gradient(135deg, rgba(162, 237, 86, 0.0) 0%, rgba(253, 220, 50, 0.0) 100%);
+}
+
+/* on-tour navigation -------------------------------------------------------- */
+.on-tour-heading {
+    margin: 0 0 0.75rem;
+    color: rgba(63, 143, 135, 1);
+    font-weight: 700;
+    text-align: center;
+}
+
+.on-tour-map {
+    position: relative;
+    width: 100%;
+}
+
+.on-tour-controls {
+    position: absolute;
+    left: 50%;
+    bottom: 1rem;
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: repeat(4, max-content);
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    max-width: calc(100% - 1.5rem);
+    padding: 0.55rem;
+    border: 1px solid rgba(63, 143, 135, 0.16);
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.16);
+    z-index: 2;
+}
+
+.on-tour-button {
+    min-height: 2.75rem;
+    min-width: 6.25rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid transparent;
+    border-radius: 0.35rem;
+    font: 700 0.95rem/1.1 Poppins, "Poppins Fallback", sans-serif;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.on-tour-button-primary {
+    background-color: rgba(63, 143, 135, 1);
+    color: white;
+}
+
+.on-tour-button-secondary {
+    background-color: #fec200;
+    color: #1d1f20;
+}
+
+.on-tour-button-light {
+    background-color: white;
+    border-color: rgba(63, 143, 135, 0.45);
+    color: rgba(63, 143, 135, 1);
+}
+
+.on-tour-button-danger {
+    background-color: #b3261e;
+    color: white;
+}
+
+.on-tour-button:hover {
+    background-color: rgb(238 213 87);
+    border-color: rgb(238 213 87);
+    color: #1d1f20;
+}
+
+@media (max-width: 700px) {
+    body:has(.on-tour-map) {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .on-tour-heading {
+        padding: 0 1rem;
+    }
+
+    .on-tour-map {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .on-tour-controls {
+        position: static;
+        transform: none;
+        display: flex;
+        width: calc(100% - 1rem);
+        max-width: none;
+        margin: 0.5rem auto 0;
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        gap: 0.35rem;
+        z-index: auto;
+    }
+
+    .on-tour-button {
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 2.25rem;
+        padding: 0.5rem 0.3rem;
+        font-size: 0.78rem;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 380px) {
+    .on-tour-controls {
+        gap: 0.25rem;
+    }
+
+    .on-tour-button {
+        font-size: 0.72rem;
+        padding-inline: 0.2rem;
+    }
 }
 
 .dropdown-menu li,
