@@ -261,13 +261,17 @@ gmp-map {
     height: 100%;
     width: 0;
     position: fixed;
-    z-index: 1;
+    z-index: 1000;
     top: 0;
     right: 0;
     background-color: rgb(241 241 241);
     overflow-x: hidden;
     transition: 0.5s;
     padding-top: 60px;
+}
+
+#slideshow {
+    z-index: 1;
 }
 
 .sidebar a {

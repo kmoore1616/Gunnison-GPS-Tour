@@ -66,27 +66,34 @@ def register_routes(app):
     def see_tours():
         col = []
 
-        sort_tour = request.args.get("sort_tour","none")
+        sort_tour = request.args.get("sort_tour", "none")
 
         if sort_tour == "longest":
-            entries = Tour.query.filter(Tour.is_public=="on").order_by(Tour.estimated_completion_time.desc()).all()
+            entries = Tour.query.order_by(Tour.estimated_completion_time.desc()).all()
         elif sort_tour == "shortest":
-            entries = Tour.query.filter(Tour.is_public=="on").order_by(Tour.estimated_completion_time.asc()).all()
+            entries = Tour.query.order_by(Tour.estimated_completion_time.asc()).all()
         elif sort_tour == "highreview":
-            entries = Tour.query.filter(Tour.is_public=="on").join(Review).group_by(Tour.id).order_by(func.avg(Review.rating).desc()).all()
+            entries_with_reviews = Tour.query.join(Review).group_by(Tour.id).order_by(
+                func.avg(Review.rating).desc()).all()
+            entries_without_reviews = Tour.query.outerjoin(Review).group_by(Tour.id).having(
+                func.count(Review.id) == 0).all()
+            entries = entries_with_reviews + entries_without_reviews
         elif sort_tour == "lowreview":
-            entries = Tour.query.filter(Tour.is_public=="on").join(Review).group_by(Tour.id).order_by(func.avg(Review.rating).asc()).all()
+            entries_with_reviews = Tour.query.join(Review).group_by(Tour.id).order_by(
+                func.avg(Review.rating).asc()).all()
+            entries_without_reviews = Tour.query.outerjoin(Review).group_by(Tour.id).having(
+                func.count(Review.id) == 0).all()
+            entries = entries_with_reviews + entries_without_reviews
         elif sort_tour == "atoz":
-            entries = Tour.query.filter(Tour.is_public=="on").order_by(Tour.name.asc()).all()
+            entries = Tour.query.order_by(Tour.name.asc()).all()
         elif sort_tour == "ztoa":
-            entries = Tour.query.filter(Tour.is_public=="on").order_by(Tour.name.desc()).all()
+            entries = Tour.query.order_by(Tour.name.desc()).all()
         else:
-            entries = Tour.query.filter(Tour.is_public=="on").all()
+            entries = Tour.query.all()
 
         for entry in entries:
             avg_rating = db.session.query(func.avg(Review.rating)).filter_by(tour_id=entry.id).scalar()
-            estimate = get_tour_time_estimate(entry)
-            col.append([entry.id, entry.name, entry.description,avg_rating or "Be the first to review it", estimate["text"], estimate["minutes"]])
+            col.append([entry.id, entry.name, entry.description, avg_rating or "Be the first to review it"])
 
         return render_template("tour_list.html", col=col)
 
