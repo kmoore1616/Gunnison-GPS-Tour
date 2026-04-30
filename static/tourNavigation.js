@@ -38,13 +38,14 @@ const options = {
 // Sets up marker for user position
 function createCurrentLocationMarkerContent() {
     const markerContent = document.createElement("div");
-    markerContent.style.width = "0";
-    markerContent.style.height = "0";
-    markerContent.style.borderLeft = "9px solid transparent";
-    markerContent.style.borderRight = "9px solid transparent";
-    markerContent.style.borderBottom = "24px solid #4285F4";
-    markerContent.style.filter = "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35))";
-    markerContent.style.transform = "rotate(45deg)";
+    markerContent.style.width = "22px";
+    markerContent.style.height = "22px";
+    markerContent.style.border = "4px solid #D93025";
+    markerContent.style.borderRadius = "50%";
+    markerContent.style.background = "#FFFFFF";
+    markerContent.style.boxSizing = "border-box";
+    markerContent.style.outline = "2px solid #FFFFFF";
+    markerContent.style.filter = "drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45))";
     markerContent.title = "Your current location";
 
     return markerContent;
