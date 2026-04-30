@@ -40,13 +40,26 @@ function createCurrentLocationMarkerContent() {
     const markerContent = document.createElement("div");
     markerContent.style.width = "22px";
     markerContent.style.height = "22px";
-    markerContent.style.border = "4px solid #D93025";
+    markerContent.style.border = "1px solid #000000";
     markerContent.style.borderRadius = "50%";
-    markerContent.style.background = "#FFFFFF";
+    markerContent.style.background = "#fec200";
     markerContent.style.boxSizing = "border-box";
-    markerContent.style.outline = "2px solid #FFFFFF";
-    markerContent.style.filter = "drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45))";
+    markerContent.style.outline = "none";
+    markerContent.style.filter = "drop-shadow(0 1px 3px rgba(0, 0, 0, 0.10))";
+    markerContent.style.position = "relative";
     markerContent.title = "Your current location";
+
+    const centerDot = document.createElement("div");
+    centerDot.style.width = "4px";
+    centerDot.style.height = "4px";
+    centerDot.style.borderRadius = "50%";
+    centerDot.style.background = "#000000";
+    centerDot.style.position = "absolute";
+    centerDot.style.top = "50%";
+    centerDot.style.left = "50%";
+    centerDot.style.transform = "translate(-50%, -50%)";
+
+    markerContent.appendChild(centerDot);
 
     return markerContent;
 }
