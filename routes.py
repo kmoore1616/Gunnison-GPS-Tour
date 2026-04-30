@@ -92,8 +92,15 @@ def register_routes(app):
             entries = Tour.query.all()
 
         for entry in entries:
-            avg_rating = db.session.query(func.avg(Review.rating)).filter_by(tour_id=entry.id).scalar()
-            col.append([entry.id, entry.name, entry.description, avg_rating or "Be the first to review it"])
+            try:
+                avg_rating = round(db.session.query(func.avg(Review.rating)).filter_by(tour_id=entry.id).scalar(),2)
+            except:
+                avg_rating = None
+            col.append([entry.id,
+                        entry.name,
+                        entry.description,
+                        avg_rating or "Be the first to review it",
+                       get_tour_time_display(entry)])
 
         return render_template("tour_list.html", col=col)
 
@@ -146,8 +153,6 @@ def register_routes(app):
         else:
             return render_template("feedback.html", success="GET")
 
-
-
     @app.route("/viewTour/<tour_id>")
     def viewtour(tour_id):
         currtour = Tour.query.filter_by(id=tour_id).first()
@@ -164,12 +169,11 @@ def register_routes(app):
             "viewTour.html",
             tour_id=tour_id,
             tour=currtour.name,
-            rating=currtour.average_rating,
+            rating=round(currtour.average_rating,2),
             time=get_tour_time_display(currtour),
             description=currtour.description,
             col=col
         )
-
 
     @app.route("/onTour/<tour_id>")
     def onTour(tour_id):
