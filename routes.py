@@ -803,7 +803,6 @@ def register_routes(app):
     @app.route("/adminreviews")
     @login_required
     def adminreviews():
-
         dropdown = Tour.query.all()
         tourdropdown = [(k.id,k.name) for k in dropdown]
 
@@ -812,8 +811,9 @@ def register_routes(app):
             entries = Review.query.filter_by(tour_id=tour_id).order_by(Review.id.desc()).all()
         else:
             entries = Review.query.all()
-        col = [(r.id, r.rating, r.comment, r.tour.name) for r in entries]
-        return render_template("adminreviews.html", col=col,tourdropdown=tourdropdown)
+
+        col = [(r.id, r.rating, r.comment, r.tour.name) for r in entries if entries]
+        return render_template("adminreviews.html", col=col, tourdropdown=tourdropdown)
 
     @app.route("/login")
     def login():

@@ -55,7 +55,7 @@ class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.String(1000))
-    tour_id = db.Column(db.Integer, db.ForeignKey("tour.id"))
+    tour_id = db.Column(db.Integer, db.ForeignKey("tour.id"), nullable=False)
 
 
 # ADMIN DATABASE
