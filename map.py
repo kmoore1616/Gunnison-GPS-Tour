@@ -30,7 +30,7 @@ def format_duration(seconds):
 
     return f"{hours} hr {minutes} min"
 
-def compute_route(origin, destination):
+def compute_route(origin, destination, include_duration=False, include_polyline=True):
     api_key = current_app.config.get("GOOGLE_MAPS_API_KEY")
     url = "https://routes.googleapis.com/directions/v2:computeRoutes"
 
@@ -50,13 +50,18 @@ def compute_route(origin, destination):
         "polylineEncoding": "ENCODED_POLYLINE",
     }
 
+    field_mask = []
+
+    if include_polyline:
+        field_mask.append("routes.polyline.encodedPolyline")
+
+    if include_duration:
+        field_mask.append("routes.duration")
+
     headers = {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": api_key,
-        "X-Goog-FieldMask": (
-            "routes.polyline.encodedPolyline,"
-            "routes.duration"
-        ),
+        "X-Goog-FieldMask": ",".join(field_mask),
     }
 
     try:
@@ -84,14 +89,22 @@ def compute_route(origin, destination):
         return None
 
     route = routes[0]
-    duration_seconds = parse_google_duration(route.get("duration"))
+    route_data = {}
 
-    return {
-        "polyline": route.get("polyline", {}).get("encodedPolyline"),
-        "duration": route.get("duration"),
-        "durationSeconds": duration_seconds,
-        "durationText": format_duration(duration_seconds),
-    }
+    if include_polyline:
+        route_data["polyline"] = route.get("polyline", {}).get("encodedPolyline")
+
+    if include_duration:
+        duration_seconds = parse_google_duration(route.get("duration"))
+        route_data.update(
+            {
+                "duration": route.get("duration"),
+                "durationSeconds": duration_seconds,
+                "durationText": format_duration(duration_seconds),
+            }
+        )
+
+    return route_data
 
 
 def get_ordered_places_for_tour(tour_id):
@@ -140,7 +153,7 @@ def get_tour_duration_estimate(tour_id):
             "lat": float(second_place.latitude),
             "lng": float(second_place.longitude),
         }
-        route = compute_route(origin, destination)
+        route = compute_route(origin, destination, include_duration=True, include_polyline=False)
 
         if route and route["durationSeconds"] is not None:
             total_duration_seconds += route["durationSeconds"]
@@ -169,16 +182,12 @@ def register_map_routes(app):
                     "stops": stops,
                     "polylines": [],
                     "segments": [],
-                    "totalDurationSeconds": 0,
-                    "totalDurationText": "0 min",
-                    "estimatedCompletionMinutes": 0,
                     "message": "Need at least 2 places to create route segments",
                 }
             )
 
         polylines = []
         segments = []
-        total_duration_seconds = 0
 
         for first_place, second_place in zip(places, places[1:]):
             origin = {"lat": float(first_place.latitude), "lng": float(first_place.longitude)}
@@ -188,27 +197,18 @@ def register_map_routes(app):
             }
             route = compute_route(origin, destination)
             polyline = None
-            duration_seconds = None
 
             if route:
                 polyline = route["polyline"]
-                duration_seconds = route["durationSeconds"]
-
-                if duration_seconds is not None:
-                    total_duration_seconds += duration_seconds
 
             segment = {
                 "origin": origin,
                 "destination": destination,
                 "polyline": polyline,
-                "durationSeconds": duration_seconds,
-                "durationText": format_duration(duration_seconds),
             }
 
             segments.append(segment)
             polylines.append(polyline)
-
-        estimated_completion_minutes = round(total_duration_seconds / 60)
 
         return jsonify(
             {
@@ -216,8 +216,5 @@ def register_map_routes(app):
                 "stops": stops,
                 "polylines": polylines,
                 "segments": segments,
-                "totalDurationSeconds": total_duration_seconds,
-                "totalDurationText": format_duration(total_duration_seconds),
-                "estimatedCompletionMinutes": estimated_completion_minutes,
             }
         )
