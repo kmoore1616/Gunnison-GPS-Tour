@@ -45,3 +45,6 @@ Once logged in either via the "Edit Welcome Message" button on the homescreen or
 Once logged in either via the "Edit Welcome Message" button on the homescreen or "Edit welcome" selected from the "edit" dropdown tab in the navigation bar it will redirect to where events can be eddited. The welcome message is automatically saved as an event so it will be shown as a current event. Any events that have been added will also be displayed with their event name, description and if it is currently public. If an event is no longer relevant it can be deleted or marked as not public to be used lated. To create a new event the event requires a name, description and if it's going to be public before it can be saved. 
 
 ### Editing/Adding Tours 
+An important aspect of this app is the ability to Create, Update, and Delete tours. This functionality is behind Edit Tours button on /adminhome. Here the admin is presented with all current tours on the site, an edit button for each, and a create new tour button. Upon clicking any of these, the admin can edit any of the stops along the tour and the ability to add new places as stops. This menu allows for quick selection of locations that are already a part of other tours and the ability to add new ones. Clicking save will update the tour with the values specified
+
+
