@@ -57,6 +57,7 @@
         <!--Event Name -->
         <table>
             {% for i in event %}
+                {% if i.title.lower() != "welcome" %}
                 <tr>
                     <td><span class="fs-2">{{ i.title }}</span></td>
                 </tr>
@@ -64,6 +65,7 @@
                     <!--Event Description -->
                     <td>{{ i.message }}</td>
                 </tr>
+                {% endif %}
             {% endfor %}
         </table>
     {% else %}

@@ -164,7 +164,10 @@ def register_routes(app):
         col = [(p.id, p.name, p.description)
                for p in places]
 
-        avg_rating = round(db.session.query(func.avg(Review.rating)).filter_by(tour_id=tour_id).scalar(),2)
+        try:
+            avg_rating = round(db.session.query(func.avg(Review.rating)).filter_by(tour_id=tour_id).scalar(),2)
+        except:
+            avg_rating = "No ratings"
 
         return render_template(
             "viewTour.html",
@@ -200,10 +203,16 @@ def register_routes(app):
     def edittours():
         tours = Tour.query.all()
         tour_times = {tour.id: get_tour_time_display(tour) for tour in tours}
+        ratings = {}
+        for tour in tours:
+            rating = db.session.query(func.avg(Review.rating)).filter_by(tour_id=tour.id).scalar()
+            ratings[tour.id] = round(rating, 2) if rating is not None else 0
+
         return render_template(
             "adminedittours.html",
             tours=tours,
-            tour_times=tour_times
+            tour_times=tour_times,
+            avg_rating=ratings
         )
 
     @app.route("/createTour")
@@ -224,6 +233,7 @@ def register_routes(app):
 
         db.session.commit()
 
+
         return render_template(
             "admineditTour.html",
             tour=currtour,
@@ -234,9 +244,11 @@ def register_routes(app):
     @login_required
     def edittour(tour_id):
         currtour = Tour.query.filter_by(id=tour_id).first()
+        avg_rating = round(db.session.query(func.avg(Review.rating)).filter_by(tour_id=tour_id).scalar(),2)
         return render_template(
             "admineditTour.html",
             tour=currtour,
+            avg_rating=avg_rating,
             estimated_time=get_tour_time_display(currtour),
             error="none"
         )
