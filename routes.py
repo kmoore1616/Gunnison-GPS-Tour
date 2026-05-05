@@ -156,7 +156,6 @@ def register_routes(app):
     @app.route("/viewTour/<tour_id>")
     def viewtour(tour_id):
         currtour = Tour.query.filter_by(id=tour_id).first()
-        print(currtour)
         if currtour is None:
             abort(404)
 
