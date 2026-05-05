@@ -156,7 +156,7 @@ def register_routes(app):
     @app.route("/viewTour/<tour_id>")
     def viewtour(tour_id):
         currtour = Tour.query.filter_by(id=tour_id).first()
-
+        print(currtour)
         if currtour is None:
             abort(404)
 
@@ -165,11 +165,13 @@ def register_routes(app):
         col = [(p.id, p.name, p.description)
                for p in places]
 
+        avg_rating = round(db.session.query(func.avg(Review.rating)).filter_by(tour_id=tour_id).scalar(),2)
+
         return render_template(
             "viewTour.html",
             tour_id=tour_id,
             tour=currtour.name,
-            rating=round(currtour.average_rating,2),
+            rating=avg_rating,
             time=get_tour_time_display(currtour),
             description=currtour.description,
             col=col
