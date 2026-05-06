@@ -159,6 +159,53 @@ The application uses SQLite databases in `instance/`:
 | `static/header.js` | Header scroll behavior. | CSS variables. |
 | `static/navbar.js` | Navigation/sidebar behavior. | Visitor/admin nav templates. |
 
+### Database Files
+
+| File | Purpose | Dependencies |
+|---|---|---|
+| `instance/admin.sqlite` | Stores credentials for admin accounts | `model.py`, `Admin` |
+| `instance/messages.sqlite` | Stores content of welcome messages and events | `model.py`, `Event` |
+| `instance/gps-database.sqlite` | Stores all information related to places, tours, and reviews | `model.py`, `Tour`, `Place`, `Review`, `Feedback`, `tour_places` |
+
+### Database Columns by File
+
+#### Columns for `admin.sqlite`
+
+| Table | Column | Data Type | Attributes | Purpose |
+|---|---|---|---|---|
+| `admin` | `username` | String - Max length of 40 characters | `UNIQUE`, `NOT NULL` | Username for admin account authentication |
+|  | `password` | String - Max length of 40 characters | `NOT NULL` |  Password for admin account authentication |
+
+#### Columns for `messages.sqlite`
+
+| Table | Column | Data Type | Attributes | Purpose |
+|---|---|---|---|---|
+| `event` | `title` | String - Max length of 100 characters | `NOT NULL` | Identifier for each event |
+|  | `message` | String - Max length of 10,000 characters | `NOT NULL` | Description for each event |
+|  | `is_public` | Integer | `NOT NULL` | Boolean variable defining whether the event is public-facing |
+
+#### Columns for `gps-database.sqlite`
+
+| Table | Column | Data Type | Attributes | Purpose |
+|---|---|---|---|---|
+| `feedback` | `comment` | String - Max length of 1,000 characters | `NOT NULL` | Stores feedback comment left by a user |
+| `place` | `name` | String - Max length of 40 characters | `UNIQUE`, `NOT NULL` | Identifier for each place |
+|  | `description` | String - Max length of 1,000 characters | None | Descriptor for each place, displayed when user reaches the place on a tour |
+|  | `longitude` | String - Max length of 25 characters | `NOT NULL` | X Coordinate for precise location |
+|  | `latitude` | String - Max length of 25 characters | `NOT NULL` | Y Coordinate for precise location |
+| `review` | `rating` | Integer | `NOT NULL` | Rating out of 5 stars |
+|  | `comment` | String - Max length of 1,000 characters | None | Optional feedback to be left alongside a review |
+|  | `tour_id` | Integer | `FOREIGN KEY`, `NOT NULL` | Identifier to tie review to a specific tour |
+| `tour` | `name` | String - Max length of 40 characters | `UNIQUE`, `NOT NULL` | Identifier for each tour |
+|  | `description` | String - Max length of 1,000 characters | None | Descriptor for each tour, displayed when getting tour overview |
+|  | `average_rating` | Float | None | An average of all ratings for the tour |
+|  | `estimated_completion_time` | Integer | None | A calculated estimate in minutes for length of the tour |
+|  | `is_public` | Integer | `NOT NULL` | Boolean variable defining whether the tour is public-facing |
+| `tour_places` | `tour_id` | Integer | `PRIMARY KEY`, `FOREIGN KEY` | Identifier for a specific tour |
+|  | `place_id` | Integer | `PRIMARY KEY`, `FOREIGN KEY` | Identifier for a specific place |
+|  | `next_stop_place_id` | Integer | `FOREIGN KEY` | Pointer to place that comes next in a tour |
+|  | `stop_num` | Integer | `NOT NULL`, `DEFAULT = 0` | Numbered position where place appears in a tour |
+
 ### Static Assets
 
 | Asset | Purpose |
