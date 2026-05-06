@@ -47,4 +47,132 @@ Once logged in either via the "Edit Welcome Message" button on the homescreen or
 ### Editing/Adding Tours 
 An important aspect of this app is the ability to Create, Update, and Delete tours. This functionality is behind Edit Tours button on /adminhome. Here the admin is presented with all current tours on the site, an edit button for each, and a create new tour button. Upon clicking any of these, the admin can edit any of the stops along the tour and the ability to add new places as stops. This menu allows for quick selection of locations that are already a part of other tours and the ability to add new ones. Clicking save will update the tour with the values specified
 
+# Troubleshooting and FAQ
+- How do I add another Admin?
+  - Currently the site does not support adding new admins directly. Instead this must be done via modifying the database directly. This option shoul be a last resort for admins
+- I updated/created a new tour but it doesnt show up in the site
+  - Make sure tour is set to public
+  - Make sure you hit save after updating/creating tour
+- The Map/Routes are not showing up
+  - The main cause of this issue is usage limits on Google's API's. If this happens either generate new credentials with a Google API account or contact the developers of the site
+- The pages are showing 404 errors
+  - This issue would most likely stem from a server issue. Either have a system administrator look into the server to determine the issue, or if not available, contact the developers for more help
+- I'm recieving email spam
+  - Contact Kyle Moore to have the SMTP email system tempoarily disabled.
 
+# Temporary or Hacky Solutions
+Although, we did our best to enforce best practcice throughout the project, time constrictions and general inexperience caused this to become a lower priority. This can be seen in the following areas that could be improved
+- Routes.py - While this file was originaly designed to contain solely the routing information and relavant Jinja varibales, it ended up containing significant funcionality beyond its scope. While the functionality works correctly, this ballooned the size of this file beyond reason and impacts readability.
+- Html naming - Throughtout the project, we went through many iterations of how the html worked, and much of these files are very similar and codged together in a unoptimal manner
+- Overuse of API calls - During the routing process, the routes are fetched at runtime rather than being stored on tour creation. This causes undue route API calls and increases usage. While we never got near our limits, this would be the first place to cut down on usage.
+   
+
+# Technical Documentation
+This will cover all details for somebody who might be extending or maintain this project.
+
+Gunnison GPS Tours is a server-rendered app with Flask/Jinja templates. Client-side JavaScript is used for map rendering, tour navigation, login requests, popup loading, and admin tour editing.
+
+## The Technology stack consists of:
+### Backend
+- **Python**
+- **Flask**: web framework and route handling.
+- **Jinja2**: HTML templating through Flask.
+- **Flask-SQLAlchemy / SQLAlchemy**: ORM and database connection management.
+- **Flask-Login**: admin session management.
+- **Flask-JSON**: JSON response helpers for several admin API routes.
+- **Flask-Mail**: sends contact form email.
+- **Requests**: calls Google Maps web APIs.
+- **python-dotenv**: loads environment variables from `.env`.
+- **better-profanity**: censors contact form submissions before email is sent.
+- ### Frontend
+
+- **HTML/Jinja templates** in `templates/`.
+- **CSS** in `static/style.css`.
+- **Raw JavaScript** in `static/*.js`.
+- **Bootstrap classes** are used in several templates for layout and button/dropdown behavior.
+- **Google Maps JavaScript API** is loaded from templates for maps, markers, geometry, and routes.
+
+### Database
+
+The application uses SQLite databases in `instance/`:
+
+- `gps-database.sqlite`: tours, places, tour ordering, reviews, and feedback.
+- `admin.sqlite`: admin login records.
+- `messages.sqlite`: homepage welcome/event records.
+
+## 3. Data Dictionary
+
+### Backend Files
+
+| File/Class | Purpose | Key Dependencies |
+|---|---|---|
+| `app.py` | Flask app registrar/orchestrator, environment config, mail setup, DB initialization, login manager setup, route registration. | Flask, dotenv, Flask-Mail, Flask-Login, `model.py`, `routes.py`, `map.py`, `mail.py`. |
+| `model.py` | SQLAlchemy database models and SQLite bind setup. | Flask-SQLAlchemy, Flask-Login. |
+| `Tour` | Model for tours. | `Review`, `Place`, `tour_places`. |
+| `Place` | Model for map/tour locations. | `Tour`, `tour_places`, Google Maps coordinates. |
+| `Review` | Model for tour ratings/comments. | `Tour`. |
+| `Admin` | Model for admin login. | Flask-Login `UserMixin`, `admin.sqlite`. |
+| `Event` | Model for homepage events and welcome message. | `messages.sqlite`. |
+| `Feedback` | Feedback Model | `gps-database.sqlite`. |
+| `tour_places` | Association table that links tours and places and stores stop order. | `Tour`, `Place`. |
+| `routes.py` | Main visitor/admin routes, API endpoints, CRUD operations, auth, and error handlers. | Flask, Flask-Login, Flask-JSON, SQLAlchemy, Requests, `model.py`, `mail.py`, `map.py`. |
+| `map.py` | Ordered stop lookup, route polyline generation, route duration calculation. | Requests, Google Routes API, `model.py`. |
+| `mail.py` | Contact form email sending and profanity filtering. | Flask-Mail, better-profanity, environment variables. |
+
+### Template Files
+
+| Template | Purpose | Dependencies |
+|---|---|---|
+| `visitornav.html` | Visitor navigation layout. | `static/style.css`, header/nav JS. |
+| `adminnav.html` | Admin navigation layout. | Admin templates. |
+| `adminloginnav.html` | Login page navigation/layout. | `adminlogin.html`. |
+| `home.html` | Visitor home page with public events/images. | `Event`, static photos. |
+| `tour_list.html` | Tour listing and sort dropdown. | `/Tours`, tour/rating/time data. |
+| `viewTour.html` | Tour detail page and overview map. | `tourMap.js`, `/get_tour_poly`. |
+| `onTour.html` | Active tour navigation map and buttons. | `tourMap.js`, `tourNavigation.js`, browser geolocation. |
+| `locations.html` | Location list with tour filter. | `Place`, `Tour`. |
+| `places.html` | Place detail page and featured tours. | `Place`, `Tour`. |
+| `feedback.html` | Contact form. | `/Contact`, `mail.py`. |
+| `popup.html` | End-of-tour review popup. | `popup.js`, `/tourfeedback`. |
+| `stopPopup.html` | Stop information popup. | `popup.js`, `tourNavigation.js`. |
+| `adminhome.html` | Admin dashboard. | Admin routes. |
+| `adminedittours.html` | Admin tour list. | `edittours` route. |
+| `admineditTour.html` | Admin tour editor. | `tourEditor.js`, admin APIs. |
+| `newStopPopup.html` | Add stop popup. | `/api/addPlaceToTour`, `/api/get_places_on_tour`. |
+| `adminreviews.html` | Admin review list and filtering. | `Review`, `Tour`, delete review API. |
+| `admineditevent.html` | Event management. | `Event`. |
+| `admineditwelcome.html` | Welcome message editor. | `Event`. |
+| `adminerror.html` | Admin error popup. | Error handlers/admin JS. |
+| `errorPage.html` | Visitor error page. | Error handlers. |
+
+### Static JavaScript Files
+
+| File | Purpose | Dependencies |
+|---|---|---|
+| `static/tourMap.js` | Loads Google Maps libraries, fetches route data, draws stop markers and route polylines. | Google Maps JS API, `/get_tour_poly`. |
+| `static/tourNavigation.js` | Active tour GPS tracking, user marker, route from user to next stop, Here/Skip/End controls. | Browser geolocation, Google Maps routes library, `tourMap.js`, `popup.js`. |
+| `static/tourEditor.js` | Admin tour stop editing, add stop popup, move/remove stops, public flag lookup, delete tour. | Admin JSON APIs and popup templates. |
+| `static/popup.js` | Dynamically loads end-of-tour and stop popups, handles review stars. | `/popup`, `/stop_popup`, `/tourfeedback`. |
+| `static/verification.js` | Admin login AJAX flow. | `/api/login`. |
+| `static/deleteevent.js` | Deletes events from admin page. | `/deleteevent/<id>`. |
+| `static/deletereview.js` | Deletes reviews from admin page. | `/deletereview/<id>`. |
+| `static/header.js` | Header scroll behavior. | CSS variables. |
+| `static/navbar.js` | Navigation/sidebar behavior. | Visitor/admin nav templates. |
+
+### Static Assets
+
+| Asset | Purpose |
+|---|---|
+| `static/style.css` | Global styling, popup styling, tour lists, admin tables, on-tour controls, responsive behavior. |
+| `static/filter.svg` | Filter icon used in dropdown controls. |
+| `static/chamber_logo_2026_v2.png` | Chamber logo. |
+| `static/photos/*` | Homepage image assets. |
+
+# Known Limitations
+The biggest gap in functionality is the lack of CRUD operations on places themselves. While most of the logic is present, there just wasn't enought time to implement a satisfactory implementation. We imagined this functionality looking very similar to tour editing operations, just with different operations.
+
+Beyond this there are a couple of small things
+- SQLite is used for its simplicity to deploy, but has limitations under high pressure situations.
+- The model contains both stop number and next stop. If extended, prefer tour_places.stop_num as the source of truth, or remove next stop entirely.
+- Admin creation is limited
+- The app does not cache Google route polyline responses.
